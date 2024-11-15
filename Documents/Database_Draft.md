@@ -5,6 +5,7 @@
 -	Name : varchar
 -	Email : varchar
 -	Image_path : varchar <Not_sure>
+-	Balance : Long
 -	Description : varchar
 -	Is_deleted : boolean
 ## Customer_Address
