@@ -5,7 +5,7 @@
 -	Name : varchar
 -	Email : varchar
 -	Image_path : varchar <Not_sure>
--	Balance : Double
+-	Balance : Float
 -	Description : varchar
 -	Is_deleted : boolean
 ## Customer_Address
@@ -107,15 +107,16 @@
 ## Order/Receipt
 -	Order ID : Long (PK)
 -	User ID : Long (FK – User)
+-	Address ID : Long (FK – Address)
 -	Order_date : Timestamp
 -	Used_Coupon_ID : Long (FK – Coupon)
--	Total_Price : Long <Keeping it is better. Less calculation and it wont be updated after creation.>****
+-	Total_Price : Float <Keeping it is better. Less calculation and it wont be updated after creation.>****
 ## Order Items
 -	Order_Item_ID : Long (PK)
 -	Order ID : Long (FK - Order)
 -	Book ID : Long (FK - Book)
 -	Quantity : Long
--	Unit_price : Long <Without discount>
+-	Unit_price : Float <Without discount>
 -	Discount ID : (FK - Discount) <br/>
 
 \* Data in the cart table is stored temporarily. Don't forget to delete it after the sale is completed. <br/>
