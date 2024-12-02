@@ -1,7 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
-import { BookModule } from './book/book.module';
+import { UserModule } from './app/user/user.module';
+import { BookModule } from './app/book/book.module';
+import { CustomerAddressModule } from './app/customer-address/customer-address.module';
+import { FriendRequestModule } from './app/friend-request/friend-request.module';
+import { ReadStatusModule } from './app/read-status/read-status.module';
+import { GenreModule } from './app/genre/genre.module';
+import { WishListModule } from './app/wish-list/wish-list.module';
+import { ReviewModule } from './app/review/review.module';
+import { ReviewLikeDislikeModule } from './app/review-like-dislike/review-like-dislike.module';
+import { CommentModule } from './app/comment/comment.module';
+import { CommentLikeDislikeModule } from './app/comment-like-dislike/comment-like-dislike.module';
+import { DiscountModule } from './app/discount/discount.module';
+import { CouponModule } from './app/coupon/coupon.module';
+import { ShoppingCartModule } from './app/shopping-cart/shopping-cart.module';
+import { CartItemModule } from './app/cart-item/cart-item.module';
+import { OrderModule } from './app/order/order.module';
+import { OrderItemModule } from './app/order-item/order-item.module';
 
 @Module({
   imports: [
@@ -18,6 +33,21 @@ import { BookModule } from './book/book.module';
     }),
     UserModule,
     BookModule,
+    CustomerAddressModule,
+    FriendRequestModule,
+    ReadStatusModule,
+    GenreModule,
+    WishListModule,
+    ReviewModule,
+    ReviewLikeDislikeModule,
+    CommentModule,
+    CommentLikeDislikeModule,
+    DiscountModule,
+    CouponModule,
+    ShoppingCartModule,
+    CartItemModule,
+    OrderModule,
+    OrderItemModule,
   ],
 })
 export class AppModule {}

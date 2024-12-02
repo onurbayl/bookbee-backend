@@ -17,7 +17,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       message: message,
       date: new Date().toISOString(),
-      path: context.getResponse().url,
+      path: context.getRequest().url,
     });
   }
 }
