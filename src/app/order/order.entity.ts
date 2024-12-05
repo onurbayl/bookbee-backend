@@ -21,9 +21,9 @@ export class Order {
     @Column({ type: 'timestamp' })
     orderDate: Date;
 
-    @ManyToOne(() => Coupon)
+    @ManyToOne(() => Coupon, { nullable: true })
     @JoinColumn([{ name: 'used_coupon_id', referencedColumnName: 'id' }])
-    usedCoupon: Coupon;
+    usedCoupon: Coupon | null;
 
     @Column({ type: 'numeric' })
     totalPrice: number;

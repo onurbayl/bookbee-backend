@@ -41,7 +41,7 @@ export class Book {
     @Column({ type: 'integer', scale: 2 })
     pageNumber: number;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'integer' })
     datePublished: number;
 
     @Column({ type: 'varchar', length: 255 })
@@ -62,6 +62,6 @@ export class Book {
     @Column({ type: 'varchar', length: 255 })
     imagePath: string;
 
-    @Column()
+    @Column({ default: false })
     isDeleted: boolean;
 }

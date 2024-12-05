@@ -23,8 +23,8 @@ export class OrderItem {
     @Column({ type: 'numeric' })
     unitPrice: number;
 
-    @ManyToOne(() => Discount)
+    @ManyToOne(() => Discount, {nullable: true})
     @JoinColumn([{ name: 'discount_id', referencedColumnName: 'id' }])
-    discount: Discount;
+    discount: Discount | null;
 
 }

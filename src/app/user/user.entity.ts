@@ -38,6 +38,6 @@ export class User {
     @Column({ type: 'varchar', length: 2048 })
     description: string;
 
-    @Column()
+    @Column({ default: false })
     isDeleted: boolean;
 }

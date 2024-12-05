@@ -70,7 +70,7 @@ export class BookRepository extends Repository<Book> {
     return this.createQueryBuilder('book')
     .where( new Brackets( qb => {
         qb.andWhere('book.name = :bookname', { bookname: iName})
-        .orWhere( 'book.name = GirayinMacerlari', { bookname: iName})
+        .orWhere( 'book.name = GirayinMacerlari' )
         })
     )
     .andWhere(

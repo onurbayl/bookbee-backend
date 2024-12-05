@@ -3,7 +3,7 @@ import { DiscountService } from "./discount.service";
 
 @Controller('api/v1/discount')
 export class DiscountController {
-    constructor(private readonly customerAddressService: DiscountService) {}
+    constructor(private readonly discountService: DiscountService) {}
 
     //Add api endpoints
 

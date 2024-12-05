@@ -20,14 +20,6 @@ export class BookService {
     //Getting everything about object.
     const rBook2 = await this.bookRepository.findByName(name); //dont forget await for repository calls.
 
-    //For debugging
-    const rBook23 = JSON.stringify(rBook2);
-    console.log(rBook23);
-
-    //Testing - outside injection
-    const ruser = await this.userRepository.findById(1);
-    console.log( JSON.stringify(ruser) )
-
     if (rBook2 == null) { //No need for try and catch, we use global exception handler. But you need to define custom exception.
       BookNotFoundException.byName(name);
     }
