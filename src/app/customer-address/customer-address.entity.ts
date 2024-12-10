@@ -20,7 +20,7 @@ export class CustomerAddress {
     @Column({ type: 'timestamp' })
     startDate : Date;
 
-    @Column({ type: 'timestamp' })
-    endDate? : Date;
+    @Column({ type: 'timestamp', nullable: true })
+    endDate : Date | null;
 
 }
