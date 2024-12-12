@@ -9,5 +9,11 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
     }
 
     //Add custom repositories
+    async findByUser(user_id: number): Promise<ShoppingCart | undefined>{
+        return this.createQueryBuilder('shoppingCart')
+        .leftJoinAndSelect('shoppingCart.user', 'user')
+        .where( 'user.id = :i_user', {i_user: user_id} )
+        .getOne();
+    }
 
 }

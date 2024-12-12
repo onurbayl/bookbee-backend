@@ -8,6 +8,14 @@ export class CartItemRepository extends Repository<CartItem> {
         super(CartItem, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async findByBookAndCart( bookId: number, cartId: number ): Promise<CartItem | undefined> {
+        return this.createQueryBuilder('cartItem')
+        .leftJoinAndSelect('cartItem.cart', 'cart')
+        .leftJoinAndSelect('cart.user', 'user')
+        .leftJoinAndSelect('cartItem.book', 'book')
+        .where( 'cart.id = :i_cart', {i_cart: cartId} )
+        .andWhere( 'book.id = :i_book', {i_book: bookId} )
+        .getOne();
+    }
 
 }

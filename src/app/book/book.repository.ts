@@ -28,6 +28,12 @@ export class BookRepository extends Repository<Book> {
 
     }
 
+    async findById(bookId: number): Promise<Book | undefined> {
+        return this.createQueryBuilder('book')
+        .where( 'book.id = :book_id', {book_id: bookId})
+        .getOne();
+    }
+
     //Get only book related info
     /* getting certain columns
     const book = await this.createQueryBuilder('book')

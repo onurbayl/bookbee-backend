@@ -4,9 +4,12 @@ import { CartItem } from "./cart-item.entity";
 import { CartItemController } from "./cart-item.controller";
 import { CartItemService } from "./cart-item.service";
 import { CartItemRepository } from "./cart-item.repository";
+import { UserModule } from "../user/user.module";
+import { BookModule } from "../book/book.module";
+import { ShoppingCartModule } from "../shopping-cart/shopping-cart.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CartItem])],
+    imports: [TypeOrmModule.forFeature([CartItem]), ShoppingCartModule, UserModule, BookModule],
     controllers: [CartItemController],
     providers: [CartItemService, CartItemRepository],
     exports: [CartItemRepository],
