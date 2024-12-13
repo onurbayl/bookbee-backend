@@ -1,0 +1,19 @@
+
+#api/v1/coupon/get-coupons
+
+[
+    {
+        "id": 1,
+        "discountPercentage": 10,
+        "startDate": "2023-11-30T21:00:00.000Z",
+        "endDate": "2028-11-30T21:00:00.000Z",
+        "used": false
+    },
+    {
+        "id": 2,
+        "discountPercentage": 15,
+        "startDate": "2023-11-30T21:00:00.000Z",
+        "endDate": "2028-11-30T21:00:00.000Z",
+        "used": false
+    }
+]
