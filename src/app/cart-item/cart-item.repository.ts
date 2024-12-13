@@ -18,4 +18,13 @@ export class CartItemRepository extends Repository<CartItem> {
         .getOne();
     }
 
+    async findByCart( cartId: number ): Promise<CartItem[]> {
+        return this.createQueryBuilder('cartItem')
+        .leftJoinAndSelect('cartItem.cart', 'cart')
+        .leftJoinAndSelect('cart.user', 'user')
+        .leftJoinAndSelect('cartItem.book', 'book')
+        .where( 'cart.id = :i_cart', {i_cart: cartId} )
+        .getMany();
+    }
+
 }

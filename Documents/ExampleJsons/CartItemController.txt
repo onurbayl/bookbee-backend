@@ -1,0 +1,152 @@
+
+#api/v1/cart-item/add-item/:bookId
+
+{
+    "book": {
+        "id": 23,
+        "name": "Ancient Secrets",
+        "description": "An archaeological thriller set in Egypt.",
+        "price": "22.00",
+        "writer": "Julia Carter",
+        "pageNumber": 280,
+        "datePublished": 2021,
+        "language": "English",
+        "bookDimension": "7.8x5 inches",
+        "barcode": "8234567890131",
+        "isbn": "978-0-316-15328-0",
+        "editionNumber": "2",
+        "imagePath": "bird.png",
+        "isDeleted": false
+    },
+    "cart": {
+        "id": 1,
+        "user": {
+            "id": 1,
+            "oidc_id": "1",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "imagePath": "bird.png",
+            "balance": "1000.00",
+            "description": "description: Customer",
+            "isDeleted": false
+        }
+    },
+    "quantity": 1,
+    "id": 7
+}
+
+#api/v1/cart-item/remove-item/:bookId
+
+- Remove item from completely (quantity 1 to 0)
+{
+    "message": "This item with ID 23 removed from shopping cart."
+}
+
+-Decrease item quantity in cart
+{
+    "id": 2,
+    "quantity": 1,
+    "cart": {
+        "id": 1,
+        "user": {
+            "id": 1,
+            "oidc_id": "1",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "imagePath": "bird.png",
+            "balance": "1000.00",
+            "description": "description: Customer",
+            "isDeleted": false
+        }
+    },
+    "book": {
+        "id": 2,
+        "name": "Mystery at Midnight",
+        "description": "A thrilling mystery that keeps you guessing.",
+        "price": "14.99",
+        "writer": "Jane Author",
+        "pageNumber": 250,
+        "datePublished": 2019,
+        "language": "English",
+        "bookDimension": "7.8x5 inches",
+        "barcode": "2345678901234",
+        "isbn": "978-1-23-456789-7",
+        "editionNumber": "2",
+        "imagePath": "bird.png",
+        "isDeleted": false
+    }
+}
+
+#api/v1/cart-item/get-items
+
+[
+    {
+        "id": 3,
+        "book": {
+            "id": 3,
+            "name": "Fantasy World Chronicles",
+            "description": "An immersive fantasy journey.",
+            "price": "24.99",
+            "writer": "Alice Dreamer",
+            "pageNumber": 450,
+            "datePublished": 2021,
+            "language": "English",
+            "bookDimension": "9x6 inches",
+            "barcode": "3456789012345",
+            "isbn": "978-0-12-345678-9",
+            "editionNumber": "3",
+            "imagePath": "bird.png",
+            "isDeleted": false
+        },
+        "quantity": 2,
+        "normalPrice": 49.98,
+        "discountPercentage": 10,
+        "finalPrice": 44.98
+    },
+    {
+        "id": 6,
+        "book": {
+            "id": 25,
+            "name": "Codebreaker",
+            "description": "A fast-paced novel about cryptography and espionage.",
+            "price": "19.50",
+            "writer": "Lucas Cipher",
+            "pageNumber": 310,
+            "datePublished": 2022,
+            "language": "English",
+            "bookDimension": "8.5x5.5 inches",
+            "barcode": "1034567890133",
+            "isbn": "978-0-316-15330-3",
+            "editionNumber": "2",
+            "imagePath": "bird.png",
+            "isDeleted": false
+        },
+        "quantity": 4,
+        "normalPrice": 78,
+        "discountPercentage": 0,
+        "finalPrice": 78
+    },
+    {
+        "id": 2,
+        "book": {
+            "id": 2,
+            "name": "Mystery at Midnight",
+            "description": "A thrilling mystery that keeps you guessing.",
+            "price": "14.99",
+            "writer": "Jane Author",
+            "pageNumber": 250,
+            "datePublished": 2019,
+            "language": "English",
+            "bookDimension": "7.8x5 inches",
+            "barcode": "2345678901234",
+            "isbn": "978-1-23-456789-7",
+            "editionNumber": "2",
+            "imagePath": "bird.png",
+            "isDeleted": false
+        },
+        "quantity": 1,
+        "normalPrice": 14.99,
+        "discountPercentage": 0,
+        "finalPrice": 14.99
+    }
+]
