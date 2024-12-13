@@ -11,4 +11,10 @@ export class CartItemController {
         return result;
     }
 
+    @Patch('remove-item/:bookId')
+    async removeItemToCart( @Param('bookId') bookId: number, @Query('u_id') userId: number = 0 ) {
+        const result = this.cartItemService.removeItemToCart(bookId, userId);
+        return result;
+    }
+
 }
