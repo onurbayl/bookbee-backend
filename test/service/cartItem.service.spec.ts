@@ -6,6 +6,8 @@ import { CartItem } from 'src/app/cart-item/cart-item.entity';
 import { CartItemRepository } from 'src/app/cart-item/cart-item.repository';
 import { CartItemService } from 'src/app/cart-item/cart-item.service';
 import { CartItemNotFoundException } from 'src/app/cart-item/exceptions/cart-item-not-found.exception';
+import { Discount } from 'src/app/discount/discount.entity';
+import { DiscountRepository } from 'src/app/discount/discount.repository';
 import { ShoppingCartNotFoundException } from 'src/app/shopping-cart/exceptions/shopping-cart-not-found.exception';
 import { ShoppingCart } from 'src/app/shopping-cart/shopping-cart.entity';
 import { ShoppingCartRepository } from 'src/app/shopping-cart/shopping-cart.repository';
@@ -17,10 +19,12 @@ describe('CartItemService', () => {
   let bookRepository: Partial<BookRepository>;
   let userRepository: Partial<UserRepository>;
   let shoppingCartRepository: Partial<ShoppingCartRepository>;
+  let discountRepository: Partial<DiscountRepository>;
 
   beforeEach(async () => {
     cartItemRepository = {
       findByBookAndCart: jest.fn(),
+      findByCart: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
     };
@@ -37,6 +41,10 @@ describe('CartItemService', () => {
       findByUser: jest.fn(),
     };
 
+    discountRepository = {
+      findByBook: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CartItemService,
@@ -44,6 +52,7 @@ describe('CartItemService', () => {
         { provide: BookRepository, useValue: bookRepository },
         { provide: UserRepository, useValue: userRepository },
         { provide: ShoppingCartRepository, useValue: shoppingCartRepository },
+        { provide: DiscountRepository, useValue: discountRepository },
       ],
     }).compile();
 
@@ -146,37 +155,6 @@ describe('CartItemService', () => {
   });
 
   });
-
-  /*
-      async removeItemToCart(bookId: number, userId: number) {
-
-        //Find cart by user
-        const cart = await this.shoppingCartRepository.findByUser(userId);
-        if(cart == null){
-            ShoppingCartNotFoundException.byId(userId);
-        }
-
-        //Get Book by id
-        const book = await this.bookRepository.findById(bookId);
-        if(book == null){
-            BookNotFoundException.byId(bookId);
-        }
-
-        //Check if cart item exists
-        let cartItem = await this.cartItemRepository.findByBookAndCart(bookId, cart.id);
-        if( cartItem == null ){
-            CartItemNotFoundException.byBookAndUser(bookId, userId);
-        }
-
-        if( cartItem.quantity == 1 ){ //If quantity 1, delete it.
-            this.cartItemRepository.delete(cartItem);
-            return { message: 'This item with ID ' + bookId.toString() + ' removed from shopping cart.' }
-        } else{ //Otherwise, save updated value.
-            cartItem.quantity -= 1;
-            return this.cartItemRepository.save(cartItem);
-        }
-    }
-  */
   
   describe('removeItemToCart', () => {
       it('Success_CartItem_Deleted', async () => {
@@ -286,5 +264,77 @@ describe('CartItemService', () => {
     });
   
   });
+
+  describe('getItemsFromCart', () => {
+    it('Success', async () => {
+        const mockCart = new ShoppingCart();
+        mockCart.id = 1;
+
+        const mockBook1 = new Book();
+        mockBook1.id = 1;
+        mockBook1.name = 'Test Book 1';
+        mockBook1.price = 8.00;
+
+        const mockBook2 = new Book();
+        mockBook2.id = 2;
+        mockBook2.name = 'Test Book 2';
+        mockBook2.price = 20.00;
+
+        const mockCartItem1 = new CartItem();
+        mockCartItem1.id = 1;
+        mockCartItem1.book = mockBook1;
+        mockCartItem1.cart = mockCart;
+        mockCartItem1.quantity = 2;
+
+        const mockCartItem2 = new CartItem();
+        mockCartItem2.id = 2;
+        mockCartItem2.book = mockBook2;
+        mockCartItem2.cart = mockCart;
+        mockCartItem2.quantity = 2;
+
+        const mockCartItemList: CartItem[] = [];
+        mockCartItemList.push(mockCartItem1);
+        mockCartItemList.push(mockCartItem2);
+
+        const mockDiscount = new Discount();
+        mockDiscount.id = 1;
+        mockDiscount.book = mockBook2;
+        mockDiscount.discountPercentage = 10;
+
+        const expectedResult = {message: 'This item with ID 1 removed from shopping cart.'};
+
+        (shoppingCartRepository.findByUser as jest.Mock).mockResolvedValue(mockCart);
+        (cartItemRepository.findByCart as jest.Mock).mockResolvedValue(mockCartItemList);
+        (discountRepository.findByBook as jest.Mock).mockImplementation( (bookId: number) => {
+          if( bookId == 1 ){
+            return null;
+          }
+          else if( bookId == 2 ){
+            return mockDiscount;
+          }
+        } )
+
+        const result = await cartItemService.getItemsFromCart(1);
+
+        expect(result.length).toBe(2);
+        const normalSum = result.reduce((acc, item) => acc + item.normalPrice, 0);
+        const finalSum = result.reduce((acc, item) => acc + item.finalPrice, 0);
+        expect(normalSum).toBe(56);
+        expect(finalSum).toBe(52);
+        expect(shoppingCartRepository.findByUser).toHaveBeenCalledWith(1);
+        expect(cartItemRepository.findByCart).toHaveBeenCalledWith(1);
+        expect(discountRepository.findByBook).toHaveBeenCalledWith(1);
+        expect(discountRepository.findByBook).toHaveBeenCalledWith(2);
+    });
+
+    it('Fail_ShoppingCartNotFound', async () => {
+  
+      (shoppingCartRepository.findByUser as jest.Mock).mockResolvedValue(null);
+  
+      await expect(cartItemService.getItemsFromCart(1)).rejects.toThrow(ShoppingCartNotFoundException);
+      expect(shoppingCartRepository.findByUser).toHaveBeenCalledWith(1);
+    });
+
+});
 
 });

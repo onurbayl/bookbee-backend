@@ -8,6 +8,9 @@ import { ShoppingCartRepository } from "../shopping-cart/shopping-cart.repositor
 import { ShoppingCartNotFoundException } from "../shopping-cart/exceptions/shopping-cart-not-found.exception";
 import { CartItem } from "./cart-item.entity";
 import { CartItemNotFoundException } from "./exceptions/cart-item-not-found.exception";
+import { DiscountRepository } from "../discount/discount.repository";
+import { cartItemWithPriceDto } from "./dtos/cart-item-with-price-dto";
+import { Discount } from "../discount/discount.entity";
 
 @Injectable()
 export class CartItemService {
@@ -23,6 +26,9 @@ export class CartItemService {
 
         @InjectRepository(BookRepository)
         private readonly bookRepository: BookRepository,
+
+        @InjectRepository(DiscountRepository)
+        private readonly discountRepository: DiscountRepository,
     ) {}
 
     async addItemToCart(bookId: number, userId: number) {
@@ -83,6 +89,43 @@ export class CartItemService {
             cartItem.quantity -= 1;
             return await this.cartItemRepository.save(cartItem);
         }
+    }
+
+    async getItemsFromCart(userId: number) {
+
+        //Find cart by user
+        const cart = await this.shoppingCartRepository.findByUser(userId);
+        if(cart == null){
+            ShoppingCartNotFoundException.byId(userId);
+        }
+
+        //Get all cart items by user
+        const cartItemList = await this.cartItemRepository.findByCart(cart.id);
+
+        let cartItemDtoList: cartItemWithPriceDto[] = [];
+
+        //Get all discount for all items inside cart
+        for( const item of cartItemList ){
+
+            const discount = await this.discountRepository.findByBook(item.book.id);
+
+            const newDto = new cartItemWithPriceDto();
+            newDto.id = item.id;
+            newDto.book = item.book;
+            newDto.quantity = item.quantity;
+            newDto.normalPrice = item.quantity * item.book.price;
+            if( discount == null ){
+                newDto.discountPercentage = 0;
+                newDto.finalPrice = newDto.normalPrice;
+            } else {
+                newDto.discountPercentage = discount.discountPercentage;
+                newDto.finalPrice = parseFloat( (newDto.normalPrice * ( 100 - discount.discountPercentage ) / 100).toFixed(2) );
+            }
+
+            cartItemDtoList.push(newDto);
+        }
+
+        return cartItemDtoList;
     }
 
 }
