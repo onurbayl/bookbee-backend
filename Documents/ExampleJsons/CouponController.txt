@@ -17,3 +17,23 @@
         "used": false
     }
 ]
+
+#api/v1/coupon/add-coupon
+
+{
+    "user": {
+        "id": 1,
+        "oidc_id": "1",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "imagePath": "bird.png",
+        "balance": "1000.00",
+        "description": "description: Customer",
+        "isDeleted": false
+    },
+    "discountPercentage": 15,
+    "startDate": "2024-12-13T21:48:44.481Z",
+    "endDate": "2028-12-12T00:00:00.000Z",
+    "used": false,
+    "id": 8
+}
