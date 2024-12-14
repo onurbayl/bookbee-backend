@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
 import { Genre } from "../genre/genre.entity";
+import { Exclude } from "class-transformer";
 
 @Entity()
 export class User {
@@ -7,6 +8,7 @@ export class User {
     id: number;
 
     @Column({ type: 'varchar', length: 255 })
+    //@Exclude()
     uid: string;
 
     @Column({ type: 'varchar', length: 255 })
@@ -33,7 +35,7 @@ export class User {
     imagePath: string;
 
     @Column({ type: 'numeric', scale: 2  })
-    balance: string;
+    balance: number;
 
     @Column({ type: 'varchar', length: 2048 })
     description: string;

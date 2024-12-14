@@ -11,6 +11,7 @@ import { CartItemNotFoundException } from "./exceptions/cart-item-not-found.exce
 import { DiscountRepository } from "../discount/discount.repository";
 import { cartItemWithPriceDto } from "./dtos/cart-item-with-price-dto";
 import { Discount } from "../discount/discount.entity";
+import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 
 @Injectable()
 export class CartItemService {
@@ -31,12 +32,16 @@ export class CartItemService {
         private readonly discountRepository: DiscountRepository,
     ) {}
 
-    async addItemToCart(bookId: number, userId: number) {
+    async addItemToCart(bookId: number, userUId: string) {
 
+        const user = await this.userRepository.findByUId(userUId)
+        if(user == null){
+            UserNotFoundException.byId(1)
+        }
         //Find cart by user
-        const cart = await this.shoppingCartRepository.findByUser(userId);
+        const cart = await this.shoppingCartRepository.findByUser(user.id);
         if(cart == null){
-            ShoppingCartNotFoundException.byId(userId);
+            ShoppingCartNotFoundException.byId(user.id);
         }
 
         //Get Book by id
