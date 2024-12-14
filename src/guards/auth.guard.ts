@@ -7,5 +7,11 @@ export class AuthGuard implements CanActivate{
     canActivate(context: ExecutionContext,): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest();
         return this.userService.validateRequest(request);
+
+        /* const isValid = this.userService.validateRequest(request);
+        if (!isValid){
+            throw new ForbiddenException('You are not authorized to access this resource');
+        }
+        return isValid; */
     }
 }

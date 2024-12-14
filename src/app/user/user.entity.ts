@@ -7,7 +7,7 @@ export class User {
     id: number;
 
     @Column({ type: 'varchar', length: 255 })
-    oidc_id: string;
+    uid: string;
 
     @Column({ type: 'varchar', length: 255 })
     name: string;

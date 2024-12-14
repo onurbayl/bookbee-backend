@@ -1,7 +1,7 @@
 # Database Content
 ## User
 -	User ID : Long (PK)
--	OIDC ID : varchar/ID <Firebase_user_id>
+-	UID : varchar/ID <Firebase_user_id>
 -	Name : varchar
 -	Email : varchar
 -	Image_path : varchar <Not_sure>

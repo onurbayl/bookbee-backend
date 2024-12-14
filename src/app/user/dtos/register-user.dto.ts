@@ -17,7 +17,4 @@ export class RegisterUserDto {
     @Length(8, 20)
     password: string;
 
-
-
-
 }

@@ -676,7 +676,7 @@ ALTER SEQUENCE public.shopping_cart_id_seq OWNED BY public.shopping_cart.id;
 
 CREATE TABLE public."user" (
     id integer NOT NULL,
-    oidc_id character varying(255) NOT NULL,
+    uid character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     email character varying(255) NOT NULL,
     "imagePath" character varying(255) NOT NULL,
@@ -1385,7 +1385,7 @@ COPY public.shopping_cart (id, user_id) FROM stdin;
 -- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."user" (id, oidc_id, name, email, "imagePath", balance, description, "isDeleted") FROM stdin;
+COPY public."user" (id, uid, name, email, "imagePath", balance, description, "isDeleted") FROM stdin;
 1	1	John Doe	john.doe@example.com	bird.png	1000.00	description: Customer	f
 2	2	Jane Smith	jane.smith@example.com	bird.png	1000.00	description: Customer	f
 3	3	Alice Johnson	alice.johnson@example.com	bird.png	1000.00	description: Publisher	f

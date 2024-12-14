@@ -22,7 +22,7 @@
         "id": 1,
         "user": {
             "id": 1,
-            "oidc_id": "1",
+            "uid": "1",
             "name": "John Doe",
             "email": "john.doe@example.com",
             "imagePath": "bird.png",
@@ -50,7 +50,7 @@
         "id": 1,
         "user": {
             "id": 1,
-            "oidc_id": "1",
+            "uid": "1",
             "name": "John Doe",
             "email": "john.doe@example.com",
             "imagePath": "bird.png",

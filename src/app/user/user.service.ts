@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
@@ -6,6 +6,8 @@ import { RegisterUserDto } from './dtos/register-user.dto';
 import { LoginDto } from './dtos/login.dto';
 import * as firebaseAdmin from 'firebase-admin'
 import axios from 'axios';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -15,7 +17,116 @@ export class UserService {
 
   ) {}
 
-  //Service methods
+  // Unban user by setting isDeleted to false
+  async unbanUser(id: number): Promise<User> {
+    // Find the user by ID
+    const user = await this.userRepository.findOne({
+      where: {id},
+      relations: ['favoriteGenres']
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Set isDeleted to true
+    user.isDeleted = false;
+
+    // Save the updated user back to the database
+    return await this.userRepository.save(user);
+  }
+
+
+  // Ban user by setting isDeleted to true
+  async banUser(id: number): Promise<User> {
+    // Find the user by ID
+    const user = await this.userRepository.findOne({
+      where: {id},
+      relations: ['favoriteGenres']
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Set isDeleted to true
+    user.isDeleted = true;
+
+    // Save the updated user back to the database
+    return await this.userRepository.save(user);
+  }
+
+  // Method to update user profile
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Update user profile fields
+    if (updateUserDto.name) user.name = updateUserDto.name;
+    if (updateUserDto.description) user.description = updateUserDto.description;
+    if (updateUserDto.imagePath) user.imagePath = updateUserDto.imagePath;
+    //const updatedUser = { ...user, ...updateUserDto };
+
+    return await this.userRepository.save(user);
+    //return this.userRepository.save(updatedUser);
+  }
+
+  async getUserById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['favoriteGenres'], // Include favoriteGenres relation
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
+  }
+  
+  async getAllUsers() {
+    // Fetch all users from the database
+    return await this.userRepository.find({
+      relations: ['favoriteGenres'], // Load related genres if needed
+    });
+  }
+
+  async createUser(createUserDto: CreateUserDto) {
+    const { name, email, description, uid } = createUserDto;
+
+    // Check if UID already exists
+    const existingUser = await this.userRepository.findOne({ where: { uid } });
+    if (existingUser) {
+      throw new BadRequestException('User with this UID already exists');
+    }
+
+    // Check if email already exists
+    const existingEmail = await this.userRepository.findOne({ where: { email } });
+    if (existingEmail) {
+      throw new BadRequestException('Email is already registered');
+    }
+
+    // Create new user entity
+    const newUser = this.userRepository.create({
+      name,
+      email,
+      description,
+      uid,
+      imagePath: '', // Default or empty value
+      balance: '0.00', // Default balance as string
+      isDeleted: false, // Default value
+    });
+
+    // Save user to the database
+    return await this.userRepository.save(newUser);
+  }
+
+
   // no need, registration will be in frontend
   async registerUser(registerUser: RegisterUserDto){
     console.log(registerUser)
@@ -92,6 +203,16 @@ export class UserService {
       const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
       console.log('Decoded Token:', decodedToken);
       req.user = decodedToken;
+
+
+      // Check if the user exists in the database by UID
+      const user = await this.userRepository.findOne({ where: { uid: decodedToken.uid } });
+      // If user doesn't exist or is deleted, deny authentication
+      if (!user || user.isDeleted) {
+        console.log('User is either banned or does not exist.');
+        return false;
+      }
+
       return true;
     } catch (error) {
       if(error.code === 'auth/id-token-expired'){
