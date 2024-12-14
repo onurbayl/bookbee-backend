@@ -10,6 +10,6 @@ import { Genre } from '../genre/genre.entity';
   imports: [TypeOrmModule.forFeature([User, Genre])],
   controllers: [UserController],
   providers: [UserService, UserRepository],
-  exports: [UserRepository, UserService]
+  exports: [UserRepository]
 })
 export class UserModule {}

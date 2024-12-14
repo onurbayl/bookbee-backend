@@ -8,6 +8,9 @@ import * as firebaseAdmin from 'firebase-admin'
 import axios from 'axios';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UserNotFoundException } from './exceptions/user-not-found.exception';
+import { UserBadRequestException } from './exceptions/user-bad-request.exception';
+import { UserUnauthorizedException } from './exceptions/user-unauthorized.exception';
 
 @Injectable()
 export class UserService {
@@ -18,18 +21,20 @@ export class UserService {
   ) {}
 
   // Unban user by setting isDeleted to false
-  async unbanUser(id: number): Promise<User> {
+  async unbanUser(id: number, reqUid: string): Promise<User> {
     // Find the user by ID
-    const user = await this.userRepository.findOne({
-      where: {id},
-      relations: ['favoriteGenres']
-    });
+    const user = await this.userRepository.findById(id);
 
     if (!user) {
-      throw new Error('User not found');
+      UserNotFoundException.byId(id);
     }
 
-    // Set isDeleted to true
+    // prevent self unban
+    if(reqUid === user.uid){
+      UserBadRequestException.selfUnban();
+    }
+
+    // Set isDeleted to false
     user.isDeleted = false;
 
     // Save the updated user back to the database
@@ -38,15 +43,17 @@ export class UserService {
 
 
   // Ban user by setting isDeleted to true
-  async banUser(id: number): Promise<User> {
+  async banUser(id: number, reqUid: string): Promise<User> {
     // Find the user by ID
-    const user = await this.userRepository.findOne({
-      where: {id},
-      relations: ['favoriteGenres']
-    });
+    const user = await this.userRepository.findById(id)
 
     if (!user) {
-      throw new Error('User not found');
+      UserNotFoundException.byId(id);
+    }
+
+    // prevent self unban
+    if(reqUid === user.uid){
+      UserBadRequestException.selfBan();
     }
 
     // Set isDeleted to true
@@ -57,33 +64,33 @@ export class UserService {
   }
 
   // Method to update user profile
-  async updateUser(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
+  async updateUser(id: number, updateUserDto: UpdateUserDto, isAdmin: boolean, reqUid: string) {
+    const user = await this.userRepository.findById(id);
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      UserNotFoundException.byId(id);
+    }
+
+    if(reqUid !== user.uid && !isAdmin){
+      UserUnauthorizedException.byNotPermitted()
     }
 
     // Update user profile fields
-    if (updateUserDto.name) user.name = updateUserDto.name;
+    /* if (updateUserDto.name) user.name = updateUserDto.name;
     if (updateUserDto.description) user.description = updateUserDto.description;
-    if (updateUserDto.imagePath) user.imagePath = updateUserDto.imagePath;
-    //const updatedUser = { ...user, ...updateUserDto };
+    if (updateUserDto.imagePath) user.imagePath = updateUserDto.imagePath; */
+    const updatedUser = { ...user, ...updateUserDto }; // data mapping like above
 
-    return await this.userRepository.save(user);
-    //return this.userRepository.save(updatedUser);
+    //return await this.userRepository.save(user);
+    return this.userRepository.save(updatedUser);
   }
 
+  //
   async getUserById(id: number): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['favoriteGenres'], // Include favoriteGenres relation
-    });
+    const user = await this.userRepository.findById(id);
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      UserNotFoundException.byId(id)
     }
 
     return user;
@@ -91,36 +98,34 @@ export class UserService {
   
   async getAllUsers() {
     // Fetch all users from the database
-    return await this.userRepository.find({
-      relations: ['favoriteGenres'], // Load related genres if needed
-    });
+    return this.userRepository.findAll();
   }
 
   async createUser(createUserDto: CreateUserDto) {
     const { name, email, description, uid } = createUserDto;
 
     // Check if UID already exists
-    const existingUser = await this.userRepository.findOne({ where: { uid } });
+    const existingUser = await this.userRepository.findByUId(uid);
+
     if (existingUser) {
-      throw new BadRequestException('User with this UID already exists');
+      UserBadRequestException.byExistingUid();
     }
 
     // Check if email already exists
-    const existingEmail = await this.userRepository.findOne({ where: { email } });
+    const existingEmail = await this.userRepository.findByEmail(email);
     if (existingEmail) {
-      throw new BadRequestException('Email is already registered');
+      UserBadRequestException.byExistingEmail(email);
     }
 
     // Create new user entity
-    const newUser = this.userRepository.create({
-      name,
-      email,
-      description,
-      uid,
-      imagePath: '', // Default or empty value
-      balance: '0.00', // Default balance as string
-      isDeleted: false, // Default value
-    });
+    const newUser = new User();
+    newUser.name = name;
+    newUser.email = email;
+    newUser.description = description;
+    newUser.uid = uid;
+    newUser.imagePath = '';
+    newUser.balance = 0;
+    newUser.isDeleted = false;
 
     // Save user to the database
     return await this.userRepository.save(newUser);
@@ -164,6 +169,7 @@ export class UserService {
       }
     }
   }
+
   // not necessary
   private async signInWithEmailAndPassword(email: string, password: string) {
     const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.KEY}`;
@@ -185,7 +191,7 @@ export class UserService {
     }
   }
 
-  // This is the most important part, necessary
+  /* // This is the most important part, necessary
   async validateRequest(req): Promise<boolean> {
     const authHeader = req.headers['authorization'];
     if(!authHeader){
@@ -224,13 +230,13 @@ export class UserService {
       }
       return false;
     }
-  }
+  } */
   // mock
   async findAll(){
     return "All users returned!"
   }
 
-  async validateAdminRequest(request) : Promise<boolean> {
+  /* async validateAdminRequest(request) : Promise<boolean> {
     const token = request.headers.authorization?.split('Bearer ')[1];
 
     if (!token) {
@@ -256,7 +262,7 @@ export class UserService {
       //throw new ForbiddenException(`Access denied: ${error.message}`);
       return false;
     }
-  }
+  } */
 
   // not necessary
   // it is like login, just not using email and password credentials. uses refresh token instead.
