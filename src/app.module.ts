@@ -17,6 +17,8 @@ import { ShoppingCartModule } from './app/shopping-cart/shopping-cart.module';
 import { CartItemModule } from './app/cart-item/cart-item.module';
 import { OrderModule } from './app/order/order.module';
 import { OrderItemModule } from './app/order-item/order-item.module';
+import { ConfigModule } from '@nestjs/config'
+import { AuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { OrderItemModule } from './app/order-item/order-item.module';
       synchronize: true,
       logging: true, // This enables SQL query logging
     }),
+    ConfigModule.forRoot(),
     UserModule,
     BookModule,
     CustomerAddressModule,
@@ -49,5 +52,6 @@ import { OrderItemModule } from './app/order-item/order-item.module';
     OrderModule,
     OrderItemModule,
   ],
+  providers: [AuthGuard],
 })
 export class AppModule {}
