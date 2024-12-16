@@ -7,6 +7,10 @@ import * as fs from 'fs';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: '*', // Allows all origins (not recommended for production)
+  });
+
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 

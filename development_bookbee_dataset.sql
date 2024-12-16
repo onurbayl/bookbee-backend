@@ -1386,12 +1386,12 @@ COPY public.shopping_cart (id, user_id) FROM stdin;
 --
 
 COPY public."user" (id, uid, name, email, "imagePath", balance, description, "isDeleted") FROM stdin;
-1	1	John Doe	john.doe@example.com	bird.png	1000.00	description: Customer	f
-2	2	Jane Smith	jane.smith@example.com	bird.png	1000.00	description: Customer	f
-3	3	Alice Johnson	alice.johnson@example.com	bird.png	1000.00	description: Publisher	f
-4	4	Bob Brown	bob.brown@example.com	bird.png	1000.00	description: Publisher	f
-5	5	Charlie Adams	charlie.adams@example.com	bird.png	1000.00	description: Admin	f
-6	6	Dana White	dana.white@example.com	bird.png	1000.00	description: Admin	f
+1	MhndGcq5KXYYYHROtH01EPhh3rj2	John Doe	john.doe@example.com	bird.png	1000.00	description: Customer	f
+2	7aMoSunupXV412c3JNDOY7yTNk43	Jane Smith	jane.smith@example.com	bird.png	1000.00	description: Customer	f
+3	V1UrO2Pr4aU5uWiHXJ3BmFrXHVC3	Alice Johnson	alice.johnson@example.com	bird.png	1000.00	description: Publisher	f
+4	fgxYhFZScufIA5jzyInPsnF7eQy2	Bob Brown	bob.brown@example.com	bird.png	1000.00	description: Publisher	f
+5	M8ZvkaZKMjOpRgaN4evGnrf7XAh2	Charlie Adams	charlie.adams@example.com	bird.png	1000.00	description: Admin	f
+6	cvVlKdwv7HY97bOr6aevPP0dpPF2	Dana White	dana.white@example.com	bird.png	1000.00	description: Admin	f
 \.
 
 

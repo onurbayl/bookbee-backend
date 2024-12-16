@@ -81,6 +81,11 @@ export class UserController {
     return await this.userService.getUserById(id);
   }
 
+  @Get('/by-token')
+  async getUserByToken(@Body() token: string) {
+    return await this.userService.getUserByToken(token);
+  }
+
   
   // no need registration will be in frontend
   @Post('register')
