@@ -81,6 +81,11 @@ export class UserController {
     return await this.userService.getUserById(id);
   }
 
+  @Get('/uid/:uid')
+  async getUserByUId(@Param('uid') uid: string) {
+    return await this.userService.getUserByUId(uid);
+  }
+
   
   // no need registration will be in frontend
   @Post('register')

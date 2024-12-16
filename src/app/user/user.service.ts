@@ -36,6 +36,9 @@ export class UserService {
 
     // Set isDeleted to false
     user.isDeleted = false;
+    firebaseAdmin.auth().updateUser(user.uid, {
+      disabled: false
+    });
 
     // Save the updated user back to the database
     return await this.userRepository.save(user);
@@ -58,6 +61,10 @@ export class UserService {
 
     // Set isDeleted to true
     user.isDeleted = true;
+    firebaseAdmin.auth().revokeRefreshTokens(user.uid)
+    firebaseAdmin.auth().updateUser(user.uid, {
+      disabled: true
+    });
 
     // Save the updated user back to the database
     return await this.userRepository.save(user);
@@ -95,6 +102,16 @@ export class UserService {
 
     return user;
   }
+
+  async getUserByUId(uid: string): Promise<User> {
+    const user = await this.userRepository.findByUId(uid);
+
+    if (!user) {
+      UserNotFoundException.byUId(uid)
+    }
+
+    return user;
+  }
   
   async getAllUsers() {
     // Fetch all users from the database
@@ -103,6 +120,11 @@ export class UserService {
 
   async createUser(createUserDto: CreateUserDto) {
     const { name, email, description, uid } = createUserDto;
+
+    const firebaseUser = await firebaseAdmin.auth().getUser(uid);
+    if(!firebaseUser){
+      UserUnauthorizedException.byInvalidUid(uid)
+    }
 
     // Check if UID already exists
     const existingUser = await this.userRepository.findByUId(uid);

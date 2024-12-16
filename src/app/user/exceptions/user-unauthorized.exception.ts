@@ -13,5 +13,9 @@ export class UserUnauthorizedException extends HttpException {
     throw new UserUnauthorizedException(`Access to this endpoint in an unpermitted way is forbidden`, HttpStatus.FORBIDDEN);
   }
 
+  static byInvalidUid(uid: string) {
+    throw new UserUnauthorizedException(`Unauthorized database write attempt`, HttpStatus.BAD_REQUEST)
+  }
+
 
 }
