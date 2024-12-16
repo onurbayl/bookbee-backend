@@ -81,9 +81,9 @@ export class UserController {
     return await this.userService.getUserById(id);
   }
 
-  @Get('/uid/:uid')
-  async getUserByUId(@Param('uid') uid: string) {
-    return await this.userService.getUserByUId(uid);
+  @Get('/by-token')
+  async getUserByToken(@Body() token: string) {
+    return await this.userService.getUserByToken(token);
   }
 
   

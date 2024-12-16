@@ -9,8 +9,8 @@ export class UserNotFoundException extends HttpException {
     throw new UserNotFoundException(`User with ID ${id} not found`, HttpStatus.NOT_FOUND)
   }
 
-  static byUId( uid: string ) {
-    throw new UserNotFoundException(`User with UID ${uid} not found`, HttpStatus.NOT_FOUND)
+  static byUId() {
+    throw new UserNotFoundException(`User with given UID not found`, HttpStatus.NOT_FOUND)
   }
 
 }
