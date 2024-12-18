@@ -34,9 +34,9 @@ export class CartItemService {
 
     async addItemToCart(bookId: number, userUId: string) {
 
-        const user = await this.userRepository.findByUId(userUId)
+        const user = await this.userRepository.findByUId(userUId);
         if(user == null){
-            UserNotFoundException.byId(1)
+            UserNotFoundException.byUId();
         }
         //Find cart by user
         const cart = await this.shoppingCartRepository.findByUser(user.id);
@@ -67,12 +67,17 @@ export class CartItemService {
         return await this.cartItemRepository.save(cartItem);
     }
 
-    async removeItemToCart(bookId: number, userId: number) {
+    async removeItemToCart(bookId: number, userUId: string) {
+
+        const user = await this.userRepository.findByUId(userUId)
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
 
         //Find cart by user
-        const cart = await this.shoppingCartRepository.findByUser(userId);
+        const cart = await this.shoppingCartRepository.findByUser(user.id);
         if(cart == null){
-            ShoppingCartNotFoundException.byId(userId);
+            ShoppingCartNotFoundException.byId(user.id);
         }
 
         //Get Book by id
@@ -84,7 +89,7 @@ export class CartItemService {
         //Check if cart item exists
         let cartItem = await this.cartItemRepository.findByBookAndCart(bookId, cart.id);
         if( cartItem == null ){
-            CartItemNotFoundException.byBookAndUser(bookId, userId);
+            CartItemNotFoundException.byBookAndUser(bookId, user.id);
         }
 
         if( cartItem.quantity == 1 ){ //If quantity 1, delete it.
@@ -96,12 +101,17 @@ export class CartItemService {
         }
     }
 
-    async getItemsFromCart(userId: number) {
+    async getItemsFromCart(userUId: string) {
+
+        const user = await this.userRepository.findByUId(userUId)
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
 
         //Find cart by user
-        const cart = await this.shoppingCartRepository.findByUser(userId);
+        const cart = await this.shoppingCartRepository.findByUser(user.id);
         if(cart == null){
-            ShoppingCartNotFoundException.byId(userId);
+            ShoppingCartNotFoundException.byId(user.id);
         }
 
         //Get all cart items by user
@@ -112,7 +122,7 @@ export class CartItemService {
         //Get all discount for all items inside cart
         for( const item of cartItemList ){
 
-            const discount = await this.discountRepository.findByBook(item.book.id);
+            const discount: Discount = await this.discountRepository.findByBook(item.book.id);
 
             const newDto = new cartItemWithPriceDto();
             newDto.id = item.id;

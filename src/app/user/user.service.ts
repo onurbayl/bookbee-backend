@@ -11,12 +11,17 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserNotFoundException } from './exceptions/user-not-found.exception';
 import { UserBadRequestException } from './exceptions/user-bad-request.exception';
 import { UserUnauthorizedException } from './exceptions/user-unauthorized.exception';
+import { ShoppingCart } from '../shopping-cart/shopping-cart.entity';
+import { ShoppingCartRepository } from '../shopping-cart/shopping-cart.repository';
 
 @Injectable()
 export class UserService {
   constructor( //Injects repositories that you want to use
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
+
+    @InjectRepository(ShoppingCartRepository)
+    private readonly shoppingCartRepository: ShoppingCartRepository,
 
   ) {}
 
@@ -153,7 +158,13 @@ export class UserService {
     newUser.isDeleted = false;
 
     // Save user to the database
-    return await this.userRepository.save(newUser);
+    const savedUser = await this.userRepository.save(newUser);
+
+    const newCart = new ShoppingCart();
+    newCart.user = savedUser;
+    await this.shoppingCartRepository.save(newCart);
+
+    return savedUser;
   }
 
 

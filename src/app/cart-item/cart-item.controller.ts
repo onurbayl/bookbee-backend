@@ -9,21 +9,24 @@ export class CartItemController {
     @Patch('add-item/:bookId')
     @UseGuards(AuthGuard)
     async addItemToCart( @Param('bookId') bookId: number, @Request() req ) {
-        const uId = req.user.uid
-        console.log(uId)
+        const uId = req.user.uid;
         const result = this.cartItemService.addItemToCart(bookId, uId);
         return result;
     }
 
     @Patch('remove-item/:bookId')
-    async removeItemToCart( @Param('bookId') bookId: number, @Query('u_id') userId: number = 0 ) {
-        const result = this.cartItemService.removeItemToCart(bookId, userId);
+    @UseGuards(AuthGuard)
+    async removeItemToCart( @Param('bookId') bookId: number, @Request() req ) {
+        const uId = req.user.uid;
+        const result = this.cartItemService.removeItemToCart(bookId, uId);
         return result;
     }
 
     @Get('get-items')
-    async getItemsFromCart( @Query('u_id') userId: number = 0 ){
-        const result = this.cartItemService.getItemsFromCart(userId);
+    @UseGuards(AuthGuard)
+    async getItemsFromCart( @Request() req ){
+        const uId = req.user.uid;
+        const result = this.cartItemService.getItemsFromCart(uId);
         return result;
     }
 
