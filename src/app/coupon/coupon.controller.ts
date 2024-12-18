@@ -1,19 +1,27 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards, Request } from "@nestjs/common";
 import { CouponService } from "./coupon.service";
 import { createNewCouponDto } from "./dtos/create-new-coupon-dto";
+import { AuthGuard } from "src/guards/auth.guard";
+import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 
 @Controller('api/v1/coupon')
 export class CouponController {
     constructor(private readonly couponService: CouponService) {}
 
     @Get('get-coupons')
-    async getCouponsForUser( @Query('u_id') userId: number = 0 ){
-        const result = this.couponService.getCouponsForUser(userId);
+    @UseGuards(AuthGuard)
+    async getCouponsForUser( @Request() req ){
+        const uId = req.user.uid;
+        const result = this.couponService.getCouponsForUser(uId);
         return result;
     }
 
     @Post('add-coupon')
-    async addCouponToDatabase( @Body() inputData: createNewCouponDto ){
+    @UseGuards(AuthGuard)
+    async addCouponToDatabase( @Body() inputData: createNewCouponDto, @Request() req ){
+        if (req.user.role !== 'admin') {
+            UserUnauthorizedException.byNotAdmin()
+        }
         const result = this.couponService.addCouponToDatabase(inputData);
         return result;
     }

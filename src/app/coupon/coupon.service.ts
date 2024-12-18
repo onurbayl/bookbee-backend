@@ -17,14 +17,14 @@ export class CouponService {
         private readonly userRepository: UserRepository,
     ) {}
 
-    async getCouponsForUser(userId: number){
+    async getCouponsForUser(userUId: string){
 
-        const user = await this.userRepository.findById(userId);
-        if( user == null ){
-            UserNotFoundException.byId(userId);
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
         }
 
-        const couponList: Coupon[] = await this.couponRepository.findActiveByUser(userId);
+        const couponList: Coupon[] = await this.couponRepository.findActiveByUser(user.id);
         return couponList;
     }
 

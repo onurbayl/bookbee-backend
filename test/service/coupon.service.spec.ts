@@ -15,12 +15,13 @@ describe('CartItemService', () => {
 
   beforeEach(async () => {
     couponRepository = {
-        findActiveByUser: jest.fn(),
-        save: jest.fn(),
+      findActiveByUser: jest.fn(),
+      save: jest.fn(),
     };
 
     userRepository = {
-        findById: jest.fn(),
+      findByUId: jest.fn(),
+      findById: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -50,13 +51,13 @@ describe('CartItemService', () => {
 
         const mockCouponList: Coupon[] = [mockCoupon1, mockCoupon2];
 
-        (userRepository.findById as jest.Mock).mockResolvedValue(mockUser);
+        (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
         (couponRepository.findActiveByUser as jest.Mock).mockResolvedValue(mockCouponList);
 
-        const result = await couponService.getCouponsForUser(1);
+        const result = await couponService.getCouponsForUser("1");
 
         expect(result).toEqual([mockCoupon1, mockCoupon2]);
-        expect(userRepository.findById).toHaveBeenCalledWith(1);
+        expect(userRepository.findByUId).toHaveBeenCalledWith("1");
         expect(couponRepository.findActiveByUser).toHaveBeenCalledWith(1);
     });
 
@@ -64,8 +65,8 @@ describe('CartItemService', () => {
 
     (userRepository.findById as jest.Mock).mockResolvedValue(null);
 
-    await expect(couponService.getCouponsForUser(1)).rejects.toThrow(UserNotFoundException);
-    expect(userRepository.findById).toHaveBeenCalledWith(1);
+    await expect(couponService.getCouponsForUser("1")).rejects.toThrow(UserNotFoundException);
+    expect(userRepository.findByUId).toHaveBeenCalledWith("1");
   });
 
   });
