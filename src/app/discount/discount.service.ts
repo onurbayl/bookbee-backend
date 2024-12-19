@@ -79,4 +79,16 @@ export class DiscountService {
         return this.discountRepository.save(newDiscount);
     }
 
+    async getActiveDiscountForBook(bookId: number){
+
+        const book = await this.bookRepository.findById(bookId);
+        if( book == null ){
+            BookNotFoundException.byId(bookId);
+        }
+
+        const discount = await this.discountRepository.findActiveByBook(bookId);
+
+        return discount;
+    }
+
 }

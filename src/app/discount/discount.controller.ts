@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
 import { DiscountService } from "./discount.service";
 import { AuthGuard } from "src/guards/auth.guard";
 import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
@@ -17,6 +17,12 @@ export class DiscountController {
         }
         const uId = req.user.uid;
         const result = await this.discountService.addDiscountToDatabase(inputData, uId);
+        return result;
+    }
+
+    @Get('get-discount/:bookId')
+    async getActiveDiscountForBook( @Param('bookId') bookId: number ){
+        const result = this.discountService.getActiveDiscountForBook(bookId);
         return result;
     }
 
