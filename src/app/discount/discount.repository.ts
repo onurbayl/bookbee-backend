@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { Brackets, DataSource, Repository } from "typeorm";
 import { Discount } from "./discount.entity";
 
 @Injectable()
@@ -15,6 +15,15 @@ export class DiscountRepository extends Repository<Discount> {
         .andWhere('discount.startDate <= CURRENT_TIMESTAMP')
         .andWhere('discount.endDate >= CURRENT_TIMESTAMP')
         .getOne();
+    }
+
+    async findOverlapByBook(bookId: number, startDate: Date, endDate: Date): Promise<Discount[]>{
+        return this.createQueryBuilder('discount')
+        .leftJoinAndSelect('discount.book', 'book')
+        .andWhere('book.id = :bookId', { bookId })
+        .andWhere(':start_date < discount.endDate', {start_date: startDate})
+        .andWhere(':end_date > discount.startDate', {end_date: endDate})
+        .getMany();
     }
 
 }

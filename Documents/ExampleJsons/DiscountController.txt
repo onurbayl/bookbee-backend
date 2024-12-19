@@ -1,0 +1,35 @@
+
+#api/v1/discount/add-discount
+
+{
+    "book": {
+        "id": 1,
+        "name": "The Great Adventure",
+        "description": "An epic tale of courage and discovery.",
+        "price": "19.99",
+        "writer": "John Writer",
+        "pageNumber": 320,
+        "datePublished": 2020,
+        "language": "English",
+        "bookDimension": "8.5x5.5 inches",
+        "barcode": "1234567890123",
+        "isbn": "978-3-16-148410-0",
+        "editionNumber": "1",
+        "imagePath": "bird.png",
+        "isDeleted": false,
+        "publisher": {
+            "id": 3,
+            "uid": "V1UrO2Pr4aU5uWiHXJ3BmFrXHVC3",
+            "name": "Alice Johnson",
+            "email": "alice.johnson@example.com",
+            "imagePath": "bird.png",
+            "balance": "1000.00",
+            "description": "description: Publisher",
+            "isDeleted": false
+        }
+    },
+    "discountPercentage": 15,
+    "startDate": "2030-12-14T00:00:00.000Z",
+    "endDate": "2031-12-14T00:00:00.000Z",
+    "id": 15
+}

@@ -11,6 +11,7 @@ import { DiscountRepository } from 'src/app/discount/discount.repository';
 import { ShoppingCartNotFoundException } from 'src/app/shopping-cart/exceptions/shopping-cart-not-found.exception';
 import { ShoppingCart } from 'src/app/shopping-cart/shopping-cart.entity';
 import { ShoppingCartRepository } from 'src/app/shopping-cart/shopping-cart.repository';
+import { UserNotFoundException } from 'src/app/user/exceptions/user-not-found.exception';
 import { User } from 'src/app/user/user.entity';
 import { UserRepository } from 'src/app/user/user.repository';
 
@@ -145,6 +146,15 @@ describe('CartItemService', () => {
       expect(cartItemRepository.findByBookAndCart).toHaveBeenCalledWith(1, 1);
   });
 
+  it('Fail_UserNotFoundException_ByUId', async () => {
+
+    (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+    const err = await cartItemService.addItemToCart(1, "1").catch(e => e);
+    expect(err).toBeInstanceOf(UserNotFoundException);
+    expect(err.message).toContain('User with given UID not found');
+  });
+
   it('Fail_ShoppingCartNotFound', async () => {
 
     const mockUser = new User();
@@ -253,6 +263,15 @@ describe('CartItemService', () => {
         expect(shoppingCartRepository.findByUser).toHaveBeenCalledWith(1);
         expect(bookRepository.findById).toHaveBeenCalledWith(1);
         expect(cartItemRepository.findByBookAndCart).toHaveBeenCalledWith(1, 1);
+    });
+
+    it('Fail_UserNotFoundException_ByUId', async () => {
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+  
+      const err = await cartItemService.removeItemToCart(1, "1").catch(e => e);
+      expect(err).toBeInstanceOf(UserNotFoundException);
+      expect(err.message).toContain('User with given UID not found');
     });
   
     it('Fail_ShoppingCartNotFound', async () => {
@@ -373,6 +392,15 @@ describe('CartItemService', () => {
       expect(cartItemRepository.findByCart).toHaveBeenCalledWith(1);
       expect(discountRepository.findByBook).toHaveBeenCalledWith(1);
       expect(discountRepository.findByBook).toHaveBeenCalledWith(2);
+    });
+
+    it('Fail_UserNotFoundException_ByUId', async () => {
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+  
+      const err = await cartItemService.getItemsFromCart("1").catch(e => e);
+      expect(err).toBeInstanceOf(UserNotFoundException);
+      expect(err.message).toContain('User with given UID not found');
     });
 
     it('Fail_ShoppingCartNotFound', async () => {

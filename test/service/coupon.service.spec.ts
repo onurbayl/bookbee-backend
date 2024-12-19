@@ -8,7 +8,7 @@ import { UserNotFoundException } from 'src/app/user/exceptions/user-not-found.ex
 import { User } from 'src/app/user/user.entity';
 import { UserRepository } from 'src/app/user/user.repository';
 
-describe('CartItemService', () => {
+describe('CouponService', () => {
   let couponService: CouponService;
   let couponRepository: Partial<CouponRepository>;
   let userRepository: Partial<UserRepository>;
@@ -37,37 +37,37 @@ describe('CartItemService', () => {
 
   describe('getCouponsForUser', () => {
     it('Success', async () => {
-        const mockUser = new User();
-        mockUser.id = 1;
-        mockUser.name = 'Mock User';
+      const mockUser = new User();
+      mockUser.id = 1;
+      mockUser.name = 'Mock User';
 
-        const mockCoupon1 = new Coupon();
-        mockCoupon1.id = 1;
-        mockCoupon1.discountPercentage = 10;
+      const mockCoupon1 = new Coupon();
+      mockCoupon1.id = 1;
+      mockCoupon1.discountPercentage = 10;
 
-        const mockCoupon2 = new Coupon();
-        mockCoupon2.id = 2;
-        mockCoupon2.discountPercentage = 20;
+      const mockCoupon2 = new Coupon();
+      mockCoupon2.id = 2;
+      mockCoupon2.discountPercentage = 20;
 
-        const mockCouponList: Coupon[] = [mockCoupon1, mockCoupon2];
+      const mockCouponList: Coupon[] = [mockCoupon1, mockCoupon2];
 
-        (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
-        (couponRepository.findActiveByUser as jest.Mock).mockResolvedValue(mockCouponList);
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (couponRepository.findActiveByUser as jest.Mock).mockResolvedValue(mockCouponList);
 
-        const result = await couponService.getCouponsForUser("1");
+      const result = await couponService.getCouponsForUser("1");
 
-        expect(result).toEqual([mockCoupon1, mockCoupon2]);
-        expect(userRepository.findByUId).toHaveBeenCalledWith("1");
-        expect(couponRepository.findActiveByUser).toHaveBeenCalledWith(1);
+      expect(result).toEqual([mockCoupon1, mockCoupon2]);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(couponRepository.findActiveByUser).toHaveBeenCalledWith(1);
     });
 
-  it('Fail_UserNotFound', async () => {
+    it('Fail_UserNotFound', async () => {
 
-    (userRepository.findById as jest.Mock).mockResolvedValue(null);
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
 
-    await expect(couponService.getCouponsForUser("1")).rejects.toThrow(UserNotFoundException);
-    expect(userRepository.findByUId).toHaveBeenCalledWith("1");
-  });
+      await expect(couponService.getCouponsForUser("1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+    });
 
   });
 
