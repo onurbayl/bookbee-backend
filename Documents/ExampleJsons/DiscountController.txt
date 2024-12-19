@@ -1,5 +1,5 @@
 
-#api/v1/discount/add-discount
+# api/v1/discount/add-discount
 
 {
     "book": {
@@ -32,4 +32,29 @@
     "startDate": "2030-12-14T00:00:00.000Z",
     "endDate": "2031-12-14T00:00:00.000Z",
     "id": 15
+}
+
+# api/v1/discount/get-discount/:bookId
+
+{
+    "id": 1,
+    "discountPercentage": 10,
+    "startDate": "2021-12-31T21:00:00.000Z",
+    "endDate": "2025-12-31T21:00:00.000Z",
+    "book": {
+        "id": 3,
+        "name": "Fantasy World Chronicles",
+        "description": "An immersive fantasy journey.",
+        "price": "24.99",
+        "writer": "Alice Dreamer",
+        "pageNumber": 450,
+        "datePublished": 2021,
+        "language": "English",
+        "bookDimension": "9x6 inches",
+        "barcode": "3456789012345",
+        "isbn": "978-0-12-345678-9",
+        "editionNumber": "3",
+        "imagePath": "bird.png",
+        "isDeleted": false
+    }
 }

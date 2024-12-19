@@ -26,4 +26,13 @@ export class DiscountRepository extends Repository<Discount> {
         .getMany();
     }
 
+    async findActiveByBook(bookId: number): Promise<Discount>{
+        return this.createQueryBuilder('discount')
+        .leftJoinAndSelect('discount.book', 'book')
+        .where('book.id = :book_id', {book_id: bookId})
+        .andWhere('discount.startDate <= CURRENT_TIMESTAMP')
+        .andWhere('discount.endDate >= CURRENT_TIMESTAMP')
+        .getOne();
+    }
+
 }

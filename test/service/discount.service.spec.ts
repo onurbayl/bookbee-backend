@@ -21,6 +21,7 @@ describe('DiscountService', () => {
   beforeEach(async () => {
     discountRepository = {
       findOverlapByBook: jest.fn(),
+      findActiveByBook: jest.fn(),
       save: jest.fn(),
     };
 
@@ -251,42 +252,76 @@ describe('DiscountService', () => {
       expect(err.message).toContain('In discount, the discount percentage should be between 5 to 100, given value: 1500');
     });
 
-    //DiscountInvalidDataException.byOverlappingDiscount
+    it('Fail_DiscountInvalidDataException_byOverlappingDiscount', async () => {
+      const mockUser = new User();
+      mockUser.id = 1;
+      mockUser.name = 'Mock User';
+  
+      const mockBook = new Book();
+      mockBook.id = 1;
+      mockBook.publisher = mockUser;
+  
+      const mockInput = new createNewDiscountDto();
+      mockInput.bookId = 1;
+      mockInput.discountPercentage = 15;
+      mockInput.startDate = new Date('2026-12-12');
+      mockInput.endDate = new Date('2028-12-12');
+  
+      const expectedResult = new Discount();
+      expectedResult.id = 1;
+      expectedResult.book = mockBook;
+      expectedResult.discountPercentage = 15;
+      expectedResult.startDate = mockInput.startDate;
+      expectedResult.endDate = mockInput.endDate;
+  
+      const expectedResult2 = new Discount();
+      const mockOverlapList: Discount[] = [expectedResult2];
+  
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
+      (discountRepository.findOverlapByBook as jest.Mock).mockResolvedValue(mockOverlapList);
+  
+      const err = await discountService.addDiscountToDatabase(mockInput, "1").catch(e => e);
+      expect(err).toBeInstanceOf(DiscountInvalidDataException);
+      expect(err.message).toContain('The new discount overlaps with a existing one');
+    });
 
   });
 
-  it('Success', async () => {
-    const mockUser = new User();
-    mockUser.id = 1;
-    mockUser.name = 'Mock User';
+  describe('getCouponsForUser', () => {
+    it('Success', async () => {
 
-    const mockBook = new Book();
-    mockBook.id = 1;
-    mockBook.publisher = mockUser;
+      const mockBook = new Book();
+      mockBook.id = 1;
 
-    const mockInput = new createNewDiscountDto();
-    mockInput.bookId = 1;
-    mockInput.discountPercentage = 15;
-    mockInput.startDate = new Date('2026-12-12');
-    mockInput.endDate = new Date('2028-12-12');
+      const expectedResult = new Discount();
+      expectedResult.id = 1;
 
-    const expectedResult = new Discount();
-    expectedResult.id = 1;
-    expectedResult.book = mockBook;
-    expectedResult.discountPercentage = 15;
-    expectedResult.startDate = mockInput.startDate;
-    expectedResult.endDate = mockInput.endDate;
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
+      (discountRepository.findActiveByBook as jest.Mock).mockResolvedValue(expectedResult);
 
-    const expectedResult2 = new Discount();
-    const mockOverlapList: Discount[] = [expectedResult2];
+      const result = await discountService.getActiveDiscountForBook(1);
 
-    (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
-    (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
-    (discountRepository.findOverlapByBook as jest.Mock).mockResolvedValue(mockOverlapList);
+      expect(result).toEqual(expectedResult);
+      expect(bookRepository.findById).toHaveBeenCalledWith(1);
+      expect(discountRepository.findActiveByBook).toHaveBeenCalledWith(1);
+    });
 
-    const err = await discountService.addDiscountToDatabase(mockInput, "1").catch(e => e);
-    expect(err).toBeInstanceOf(DiscountInvalidDataException);
-    expect(err.message).toContain('The new discount overlaps with a existing one');
+    it('Fail_BookNotFound', async () => {
+
+      const mockBook = new Book();
+      mockBook.id = 1;
+
+      const expectedResult = new Discount();
+      expectedResult.id = 1;
+
+      (bookRepository.findById as jest.Mock).mockResolvedValue(null);
+
+      const err = await discountService.getActiveDiscountForBook(1).catch(e => e);
+      expect(err).toBeInstanceOf(BookNotFoundException);
+      expect(err.message).toContain('Book with ID 1 not found');
+    });
+
   });
 
 });
