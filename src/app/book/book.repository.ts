@@ -30,6 +30,7 @@ export class BookRepository extends Repository<Book> {
 
     async findById(bookId: number): Promise<Book | undefined> {
         return this.createQueryBuilder('book')
+        .leftJoinAndSelect('book.publisher', 'publisher')
         .where( 'book.id = :book_id', {book_id: bookId})
         .getOne();
     }
