@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Request, Get } from "@nestjs/common";
+import { Controller, Param, UseGuards, Request, Get, Post } from "@nestjs/common";
 import { WishListService } from "./wish-list.service";
 import { AuthGuard } from "src/guards/auth.guard";
 
@@ -6,11 +6,18 @@ import { AuthGuard } from "src/guards/auth.guard";
 export class WishListController {
     constructor(private readonly wishListService: WishListService) {}
 
+    @Post('add-item/:bookId')
+    @UseGuards(AuthGuard)
+    async addItemToWishList( @Param('bookId') bookId: number, @Request() req ) {
+        const uId = req.user.uid;
+        const result = this.wishListService.addItem(bookId, uId);
+        return result;
+    }
+
     @Get('get-items')
     @UseGuards(AuthGuard)
     async getItemsForUser( @Request() req ){
         const uId = req.user.uid;
-        console.log(uId);
         const result = this.wishListService.getItems(uId);
         return result;
     }

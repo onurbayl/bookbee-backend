@@ -4,6 +4,7 @@ import { WishListRepository } from "./wish-list.repository";
 import { UserRepository } from "../user/user.repository";
 import { BookRepository } from "../book/book.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
+import { BookNotFoundException } from "../book/exceptions/book-not-found.exception";
 import { WishList } from "./wish-list.entity";
 
 @Injectable()
@@ -18,6 +19,35 @@ export class WishListService {
         @InjectRepository(BookRepository)
         private readonly bookRepository: BookRepository
     ) {}
+
+    async addItem(bookId: number, userUId: string) {
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+        
+        //Get Book by id
+        const book = await this.bookRepository.findById(bookId);
+        if(book == null){
+            BookNotFoundException.byId(bookId);
+        }
+
+        //Check if item already exists
+        let wish = await this.wishListRepository.findByBookAndUser(bookId, user.id);
+        // - No: create a new wish and save
+        if( wish == null ){
+            wish = new WishList();
+            wish.user = user;
+            wish.book = book;
+            wish.dateAdded = new Date();
+        }
+        // - Yes: return it
+        else{
+            return wish;
+        }
+
+        return await this.wishListRepository.save(wish);
+    }
 
     async getItems(userUId: string) {
         const user = await this.userRepository.findByUId(userUId);

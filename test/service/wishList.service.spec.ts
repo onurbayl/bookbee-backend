@@ -5,7 +5,9 @@ import { UserNotFoundException } from 'src/app/user/exceptions/user-not-found.ex
 import { WishListRepository } from 'src/app/wish-list/wish-list.repository';
 import { WishListService } from 'src/app/wish-list/wish-list.service';
 import { WishList } from 'src/app/wish-list/wish-list.entity';
+import { Book } from 'src/app/book/book.entity';
 import { BookRepository } from 'src/app/book/book.repository';
+import { BookNotFoundException } from 'src/app/book/exceptions/book-not-found.exception';
 
 
 describe('WishListService', () => {
@@ -16,6 +18,7 @@ describe('WishListService', () => {
 
   beforeEach(async () => {
     wishListRepository = {
+      findByBookAndUser: jest.fn(),
       findByUser: jest.fn(),
       save: jest.fn(),
       delete: jest.fn()
@@ -43,8 +46,101 @@ describe('WishListService', () => {
     wishListService = module.get<WishListService>(WishListService);
   });
 
+  describe('addItem', () => {
+    it('Success_AddItem', async () => {
+      const mockUser = new User();
+      mockUser.id = 1;
+      mockUser.name = 'Mock User';
+
+      const mockBook = new Book();
+      mockBook.id = 1;
+
+      const expectedResult = new WishList();
+      expectedResult.id = 1;
+      expectedResult.user = mockUser;
+      expectedResult.book = mockBook;
+      expectedResult.dateAdded = new Date();
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
+      (wishListRepository.findByBookAndUser as jest.Mock).mockResolvedValue(null);
+      (wishListRepository.save as jest.Mock).mockImplementation((wish: WishList) => {
+        wish.id = 1;
+        return Promise.resolve(wish);
+      });
+
+      const result = await wishListService.addItem(1, "1");
+
+      expect(result.id).toEqual(expectedResult.id);
+      expect(result.user).toEqual(expectedResult.user);
+      expect(result.book).toEqual(expectedResult.book);
+      expect(result.dateAdded).toEqual(expectedResult.dateAdded);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(1);
+      expect(wishListRepository.findByBookAndUser).toHaveBeenCalledWith(1, 1);
+      expect(wishListRepository.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('Success_Exists', async () => {
+      const mockUser = new User();
+      mockUser.id = 1;
+      mockUser.name = 'Mock User';
+
+      const mockBook = new Book();
+      mockBook.id = 1;
+
+      const mockWish = new WishList();
+      mockWish.id = 1;
+      mockWish.user = mockUser;
+      mockWish.book = mockBook;
+      mockWish.dateAdded = new Date();
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
+      (wishListRepository.findByBookAndUser as jest.Mock).mockResolvedValue(mockWish);
+
+      const expectedResult = new WishList();
+      expectedResult.id = 1;
+      expectedResult.user = mockUser;
+      expectedResult.book = mockBook;
+      expectedResult.dateAdded = new Date();
+
+      const result = await wishListService.addItem(1, "1");
+
+      expect(result.id).toEqual(expectedResult.id);
+      expect(result.user).toEqual(expectedResult.user);
+      expect(result.book).toEqual(expectedResult.book);
+      expect(result.dateAdded).toEqual(expectedResult.dateAdded);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(1);
+      expect(wishListRepository.findByBookAndUser).toHaveBeenCalledWith(1, 1);
+      expect(wishListRepository.save).toHaveBeenCalledTimes(0);
+    });
+
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      await expect(wishListService.addItem(1, "1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+    });
+
+    it('Fail_BookNotFound', async () => {
+      const mockUser = new User();
+      mockUser.id = 1;
+      mockUser.name = 'Mock User';
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(wishListService.addItem(1, "1")).rejects.toThrow(BookNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(1);
+    });
+
+  });
+
   describe('getItems', () => {
-    it('Success', async () => {
+    it('Success_GetItems', async () => {
       const mockUser = new User();
       mockUser.id = 1;
       mockUser.name = 'Mock User';
