@@ -8,6 +8,15 @@ export class WishListRepository extends Repository<WishList> {
         super(WishList, dataSource.createEntityManager());
     }
 
+    async findByBookAndUser( bookId: number, userId: number ): Promise<WishList | undefined> {
+        return this.createQueryBuilder('wishList')
+        .leftJoinAndSelect('wishList.user', 'user')
+        .leftJoinAndSelect('wishList.book', 'book')
+        .andWhere( 'user.id = :i_user', {i_user: userId} )
+        .andWhere( 'book.id = :i_book', {i_book: bookId} )
+        .getOne();
+    }
+
     async findByUser(userId: number): Promise<WishList[]> {
         return this.createQueryBuilder('wishList')
         .leftJoinAndSelect('wishList.user', 'user')

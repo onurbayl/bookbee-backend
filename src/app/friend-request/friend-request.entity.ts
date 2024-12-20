@@ -18,7 +18,7 @@ export class FriendRequest {
     @Column({ type: 'timestamp' })
     dateRequest : Date
 
-    @Column({ type: 'timestamp' })
-    dateAnswered? : Date
+    @Column({ type: 'timestamp', nullable: true })
+    dateAnswered : Date | null;
 
 }
