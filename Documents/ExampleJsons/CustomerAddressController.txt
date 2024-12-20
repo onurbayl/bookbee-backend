@@ -18,3 +18,24 @@
         "isDeleted": false
     }
 }
+
+# api/v1/customerAddress/add-address
+
+{
+    "addressInfo": "Banana Street, Minion Building",
+    "startDate": "2024-12-20T19:56:03.565Z",
+    "endDate": null,
+    "current": true,
+    "user": {
+        "id": 7,
+        "uid": "UirMdmsV3eXTt9S5eIDoVcId5YP2",
+        "name": "Giray Banana Yıldırım",
+        "email": "yildirimbananagiray@gmail.com",
+        "imagePath": "",
+        "balance": "0",
+        "description": "Banana Banana Banana",
+        "isDeleted": false,
+        "favoriteGenres": []
+    },
+    "id": 8
+}
