@@ -53,13 +53,12 @@ describe('FriendRequestService', () => {
       mockFriendRequest2.sender = mockUser3;
       mockFriendRequest2.receiver = mockUser1;
       mockFriendRequest2.dateAnswered = new Date();
-
-      const expectedResult = [mockFriendRequest1, mockFriendRequest2];
       
       (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser1);
       (friendRequestRepository.findFriends as jest.Mock).mockResolvedValue([mockFriendRequest1, mockFriendRequest2]);
-
+      
       const result = await friendRequestService.getFriends("1");
+      const expectedResult = [mockUser2, mockUser3];
 
       expect(result).toEqual(expectedResult);
       expect(userRepository.findByUId).toHaveBeenCalledWith("1");
