@@ -9,7 +9,7 @@ export class CustomerAddress {
 
     @ManyToOne(() => User)
     @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-    publisher : User;
+    user : User;
 
     @Column({ type: 'varchar', length: 2048 })
     addressInfo: string;

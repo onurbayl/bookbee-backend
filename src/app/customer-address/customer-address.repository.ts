@@ -8,6 +8,12 @@ export class CustomerAddressRepository extends Repository<CustomerAddress> {
         super(CustomerAddress, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async findActiveByUser(userId: number): Promise<CustomerAddress>{
+        return this.createQueryBuilder('customerAddress')
+        .leftJoinAndSelect('customerAddress.user', 'user')
+        .where('user.id = :user_id', {user_id: userId})
+        .andWhere('customerAddress.current')
+        .getOne();
+    }
 
 }
