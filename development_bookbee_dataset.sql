@@ -352,7 +352,7 @@ ALTER SEQUENCE public.discount_id_seq OWNED BY public.discount.id;
 CREATE TABLE public.friend_request (
     id integer NOT NULL,
     "dateRequest" timestamp without time zone NOT NULL,
-    "dateAnswered" timestamp without time zone NOT NULL,
+    "dateAnswered" timestamp without time zone,
     sender_id integer,
     reciever_id integer
 );
