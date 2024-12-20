@@ -45,7 +45,7 @@ describe('DiscountService', () => {
     discountService = module.get<DiscountService>(DiscountService);
   });
 
-  describe('getCouponsForUser', () => {
+  describe('addDiscountToDatabase', () => {
     it('Success', async () => {
         const mockUser = new User();
         mockUser.id = 1;
@@ -288,7 +288,7 @@ describe('DiscountService', () => {
 
   });
 
-  describe('getCouponsForUser', () => {
+  describe('getActiveDiscountForBook', () => {
     it('Success', async () => {
 
       const mockBook = new Book();
