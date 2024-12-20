@@ -12,7 +12,7 @@ export class WishListRepository extends Repository<WishList> {
         return this.createQueryBuilder('wishList')
         .leftJoinAndSelect('wishList.user', 'user')
         .leftJoinAndSelect('wishList.book', 'book')
-        .andWhere( 'user.id = :i_user', {i_user: userId} )
+        .where( 'user.id = :i_user', {i_user: userId} )
         .andWhere( 'book.id = :i_book', {i_book: bookId} )
         .getOne();
     }
@@ -21,7 +21,7 @@ export class WishListRepository extends Repository<WishList> {
         return this.createQueryBuilder('wishList')
         .leftJoinAndSelect('wishList.user', 'user')
         .leftJoinAndSelect('wishList.book', 'book')
-        .andWhere( 'user.id = :i_user', {i_user: userId} )
+        .where( 'user.id = :i_user', {i_user: userId} )
         .getMany();
     }
 }
