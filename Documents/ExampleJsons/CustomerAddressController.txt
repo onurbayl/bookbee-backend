@@ -1,0 +1,20 @@
+
+# api/v1/customerAddress/get-address
+
+{
+    "id": 1,
+    "addressInfo": "123 Main St, Springfield, IL",
+    "current": true,
+    "startDate": "2022-12-31T21:00:00.000Z",
+    "endDate": null,
+    "user": {
+        "id": 1,
+        "uid": "MhndGcq5KXYYYHROtH01EPhh3rj2",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "imagePath": "bird.png",
+        "balance": "1000.00",
+        "description": "description: Customer",
+        "isDeleted": false
+    }
+}
