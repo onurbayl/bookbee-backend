@@ -6,6 +6,7 @@ import { UserNotFoundException } from "../user/exceptions/user-not-found.excepti
 import { FriendRequest } from "./friend-request.entity";
 import { User } from "../user/user.entity";
 
+
 @Injectable()
 export class FriendRequestService {
     constructor(
@@ -18,7 +19,7 @@ export class FriendRequestService {
 
     async getFriends(userUId: string) {
         const user = await this.userRepository.findByUId(userUId)
-        if(user == null){
+        if(user == null) {
             UserNotFoundException.byUId();
         }
 
@@ -35,5 +36,33 @@ export class FriendRequestService {
             }
         }
         return users;
+    }
+
+    async sendRequest(userUId: string, targetUserId: number) {
+        const user = await this.userRepository.findByUId(userUId)
+        if(user == null) {
+            UserNotFoundException.byUId();
+        }
+
+        const target = await this.userRepository.findById(targetUserId);
+        if(target == null) {
+            UserNotFoundException.byId(targetUserId);
+        }
+
+        // Check if friendship already exists
+        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
+        
+        if ( friendship == null ) {
+            // - No: create a new friendship then save
+            friendship = new FriendRequest();
+            friendship.sender = user;
+            friendship.receiver = target;
+            friendship.dateRequest = new Date();
+            friendship.dateAnswered = null;
+            await this.friendRequestRepository.save(friendship);
+        }
+        
+        // Return request date
+        return friendship.dateRequest;
     }
 }
