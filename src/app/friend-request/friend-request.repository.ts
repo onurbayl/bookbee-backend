@@ -22,4 +22,13 @@ export class FriendRequestRepository extends Repository<FriendRequest>{
             .andWhere('friendRequest.dateAnswered IS NOT NULL')
             .getMany();
     }
+
+    async findByUserAndTarget(senderId: number, receiverId: number): Promise<FriendRequest | undefined> {
+        return this.createQueryBuilder('friendRequest')
+            .leftJoinAndSelect('friendRequest.sender', 'sender')
+            .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+            .where('sender.id = :i_sender', { i_sender: senderId })
+            .andWhere('receiver.id = :i_receiver', { i_receiver: receiverId })
+            .getOne();
+    }
 }
