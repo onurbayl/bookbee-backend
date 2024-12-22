@@ -12,7 +12,7 @@ export class Comment {
     @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
     user: User;
 
-    @ManyToOne(() => Review)
+    @ManyToOne(() => Review, { onDelete: 'CASCADE' })
     @JoinColumn([{ name: 'review_id', referencedColumnName: 'id' }])
     review: Review;
 
