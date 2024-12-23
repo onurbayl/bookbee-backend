@@ -32,4 +32,8 @@ export class CouponInvalidDataException extends HttpException {
     throw new CouponInvalidDataException(`In coupon, the end date should not be in the past`, HttpStatus.BAD_REQUEST)
   }
 
+  static byInvalidCoupon( cId: number) {
+    throw new CouponInvalidDataException(`This coupon with id ${cId} is already used or expired.`, HttpStatus.BAD_REQUEST)
+  }
+
 }
