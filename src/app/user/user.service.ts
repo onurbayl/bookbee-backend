@@ -109,7 +109,6 @@ export class UserService {
   }
 
   async getUserByToken(uid: string): Promise<User> {
-    console.log("UID, ", uid)
     const user = await this.userRepository.findByUId(uid);
 
     if (!user) {
