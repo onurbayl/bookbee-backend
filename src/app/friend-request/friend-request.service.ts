@@ -5,6 +5,8 @@ import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { FriendRequest } from "./friend-request.entity";
 import { User } from "../user/user.entity";
+import { FriendRequestNotFoundException } from "./exceptions/friend-request-not-found.exception";
+import { FriendRequestForbiddenException } from "./exceptions/friend-request-forbidden.exception";
 
 
 @Injectable()
@@ -18,7 +20,7 @@ export class FriendRequestService {
     ) {}
 
     async getFriends(userUId: string) {
-        const user = await this.userRepository.findByUId(userUId)
+        const user = await this.userRepository.findByUId(userUId);
         if(user == null) {
             UserNotFoundException.byUId();
         }
@@ -39,7 +41,7 @@ export class FriendRequestService {
     }
 
     async sendRequest(userUId: string, targetUserId: number) {
-        const user = await this.userRepository.findByUId(userUId)
+        const user = await this.userRepository.findByUId(userUId);
         if(user == null) {
             UserNotFoundException.byUId();
         }
@@ -64,5 +66,35 @@ export class FriendRequestService {
         
         // Return request date
         return friendship.dateRequest;
+    }
+
+    async acceptRequest(userUId: string, targetUserId: number) {
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null) {
+            UserNotFoundException.byUId();
+        }
+
+        const target = await this.userRepository.findById(targetUserId);
+        if(target == null) {
+            UserNotFoundException.byId(targetUserId);
+        }
+         
+        // Check if friendship exists
+        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
+        if ( friendship == null ) {
+            FriendRequestNotFoundException.bySenderAndReceiver(user.id, target.id);
+        }
+
+        // Check if the friendship is already established
+        if ( friendship.dateAnswered != null ) {
+            FriendRequestForbiddenException.bySenderAndReceiver(user.id, target.id);
+        }
+        
+        // Respond to the request
+        friendship.dateAnswered = new Date();
+        const response = await this.friendRequestRepository.save(friendship);
+        
+        // Return response date
+        return response.dateAnswered;
     }
 }
