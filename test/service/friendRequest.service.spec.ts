@@ -1,5 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { FriendRequestForbiddenException } from "src/app/friend-request/exceptions/friend-request-forbidden.exception";
+import { FriendRequestNotFoundException } from "src/app/friend-request/exceptions/friend-request-not-found.exception";
 import { FriendRequest } from "src/app/friend-request/friend-request.entity";
 import { FriendRequestRepository } from "src/app/friend-request/friend-request.repository";
 import { FriendRequestService } from "src/app/friend-request/friend-request.service";
@@ -21,7 +22,8 @@ describe('FriendRequestService', () => {
     friendRequestRepository = {
       findFriends: jest.fn(),
       findByUserAndTarget: jest.fn(),
-      save: jest.fn()
+      save: jest.fn(),
+      deleteById: jest.fn()
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -214,6 +216,26 @@ describe('FriendRequestService', () => {
       expect(userRepository.findById).toHaveBeenCalledWith(2);
     });
 
+    it('Fail_NotFriends', async () => {
+      const mockUser1 = new User();
+      mockUser1.id = 1;
+
+      const mockUser2 = new User();
+      mockUser2.id = 2;
+      
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser1);
+      (userRepository.findById as jest.Mock).mockResolvedValue(mockUser2);
+      (friendRequestRepository.findByUserAndTarget as jest.Mock).mockResolvedValue(null);
+      
+      const err = await friendRequestService.acceptRequest("1", 2).catch(e => e);
+      expect(err).toBeInstanceOf(FriendRequestNotFoundException);
+      expect(err.message).toContain('Friendship request with sender ID 1 and receiver ID 2 not found');
+
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(userRepository.findById).toHaveBeenCalledWith(2);
+      expect(friendRequestRepository.findByUserAndTarget).toHaveBeenCalledWith(1, 2);
+    });
+
     it('Fail_AlreadyFriends', async () => {
       const mockUser1 = new User();
       mockUser1.id = 1;
@@ -235,6 +257,82 @@ describe('FriendRequestService', () => {
       const err = await friendRequestService.acceptRequest("1", 2).catch(e => e);
       expect(err).toBeInstanceOf(FriendRequestForbiddenException);
       expect(err.message).toContain('Friendship between sender with ID 1 and receiver with ID 2 already established');
+
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(userRepository.findById).toHaveBeenCalledWith(2);
+      expect(friendRequestRepository.findByUserAndTarget).toHaveBeenCalledWith(1, 2);
+    });
+  });
+
+  describe('deleteRequest', () => {
+    it('Success', async () => {
+      const mockUser1 = new User();
+      mockUser1.id = 1;
+
+      const mockUser2 = new User();
+      mockUser2.id = 2;
+
+      const mockFriendRequest = new FriendRequest();
+      mockFriendRequest.id = 1;
+      mockFriendRequest.sender = mockUser1;
+      mockFriendRequest.receiver = mockUser2;
+      mockFriendRequest.dateRequest = new Date("2022-02-20");
+      mockFriendRequest.dateAnswered = new Date("2022-03-23");
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser1);
+      (userRepository.findById as jest.Mock).mockResolvedValue(mockUser2);
+      (friendRequestRepository.findByUserAndTarget as jest.Mock).mockResolvedValue(mockFriendRequest);
+      (friendRequestRepository.deleteById as jest.Mock).mockResolvedValue(null);
+
+      const result = await friendRequestService.deleteRequest("1", 2);
+      const expectedResult = {message: "The friendship between users with ids 1 and 2 no longer exists."};
+
+      expect(result).toEqual(expectedResult);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(userRepository.findById).toHaveBeenCalledWith(2);
+      expect(friendRequestRepository.findByUserAndTarget).toHaveBeenCalledWith(1, 2);
+      expect(friendRequestRepository.deleteById).toHaveBeenCalledWith(mockFriendRequest.id);
+    });
+
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      const err = await friendRequestService.sendRequest("1", 2).catch(e => e);
+      expect(err).toBeInstanceOf(UserNotFoundException);
+      expect(err.message).toContain('User with given UID not found');
+
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+    });
+
+    it('Fail_ReceiverNotExists', async () => {
+      const mockUser1 = new User();
+      mockUser1.id = 1;
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser1);
+      (userRepository.findById as jest.Mock).mockResolvedValue(null);
+
+      const err = await friendRequestService.sendRequest("1", 2).catch(e => e);
+      expect(err).toBeInstanceOf(UserNotFoundException);
+      expect(err.message).toContain('User with ID 2 not found');
+
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(userRepository.findById).toHaveBeenCalledWith(2);
+    });
+
+    it('Fail_NotFriends', async () => {
+      const mockUser1 = new User();
+      mockUser1.id = 1;
+
+      const mockUser2 = new User();
+      mockUser2.id = 2;
+      
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser1);
+      (userRepository.findById as jest.Mock).mockResolvedValue(mockUser2);
+      (friendRequestRepository.findByUserAndTarget as jest.Mock).mockResolvedValue(null);
+      
+      const err = await friendRequestService.acceptRequest("1", 2).catch(e => e);
+      expect(err).toBeInstanceOf(FriendRequestNotFoundException);
+      expect(err.message).toContain('Friendship request with sender ID 1 and receiver ID 2 not found');
 
       expect(userRepository.findByUId).toHaveBeenCalledWith("1");
       expect(userRepository.findById).toHaveBeenCalledWith(2);
