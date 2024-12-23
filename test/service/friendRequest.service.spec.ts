@@ -152,6 +152,21 @@ describe('FriendRequestService', () => {
       expect(userRepository.findByUId).toHaveBeenCalledWith("1");
       expect(userRepository.findById).toHaveBeenCalledWith(2);
     });
+
+    it('Fail_SelfRequest', async () => {
+      const mockUser1 = new User();
+      mockUser1.id = 1;
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser1);
+      (userRepository.findById as jest.Mock).mockResolvedValue(mockUser1);
+
+      const err = await friendRequestService.sendRequest("1", 1).catch(e => e);
+      expect(err).toBeInstanceOf(FriendRequestForbiddenException);
+      expect(err.message).toContain('User with ID 1 cannot be friends with themselves.');
+
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(userRepository.findById).toHaveBeenCalledWith(1);
+    });
   });
 
   describe('acceptRequest', () => {

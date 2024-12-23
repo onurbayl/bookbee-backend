@@ -51,6 +51,11 @@ export class FriendRequestService {
             UserNotFoundException.byId(targetUserId);
         }
 
+        // Check self request
+        if(user.id == target.id) {
+            FriendRequestForbiddenException.selfRequest(user.id);
+        }
+
         // Check if friendship already exists
         let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
         

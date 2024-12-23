@@ -9,4 +9,7 @@ export class FriendRequestForbiddenException extends HttpException {
     throw new FriendRequestForbiddenException(`Friendship between sender with ID ${senderId} and receiver with ID ${receiverId} already established`, HttpStatus.FORBIDDEN)
   }
 
+  static selfRequest( senderId: number ) {
+    throw new FriendRequestForbiddenException(`User with ID ${senderId} cannot be friends with themselves.`, HttpStatus.FORBIDDEN)
+  }
 }
