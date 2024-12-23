@@ -69,6 +69,13 @@ export class UserController {
     return await this.userService.getAllUsers();
   }
 
+  @Get('bytoken')
+  @UseGuards(AuthGuard)
+  async getUserByToken(@Request() req) {
+    const uid = req.user.uid
+    return await this.userService.getUserByToken(uid);
+  }
+
   // Create user in database
   @Post('create')
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -81,10 +88,6 @@ export class UserController {
     return await this.userService.getUserById(id);
   }
 
-  @Get('/by-token')
-  async getUserByToken(@Body() token: string) {
-    return await this.userService.getUserByToken(token);
-  }
 
   
   // no need registration will be in frontend
