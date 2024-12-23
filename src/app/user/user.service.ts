@@ -108,11 +108,9 @@ export class UserService {
     return user;
   }
 
-  async getUserByToken(token: string): Promise<User> {
-
-    const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
-    
-    const user = await this.userRepository.findByUId(decodedToken.uid);
+  async getUserByToken(uid: string): Promise<User> {
+    console.log("UID, ", uid)
+    const user = await this.userRepository.findByUId(uid);
 
     if (!user) {
       UserNotFoundException.byUId()
