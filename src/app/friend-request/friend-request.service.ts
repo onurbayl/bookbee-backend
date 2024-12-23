@@ -97,4 +97,28 @@ export class FriendRequestService {
         // Return response date
         return response.dateAnswered;
     }
+
+    async deleteRequest(userUId: string, targetUserId: number) {
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null) {
+            UserNotFoundException.byUId();
+        }
+
+        const target = await this.userRepository.findById(targetUserId);
+        if(target == null) {
+            UserNotFoundException.byId(targetUserId);
+        }
+         
+        // Check if friendship exists
+        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
+        if ( friendship == null ) {
+            FriendRequestNotFoundException.bySenderAndReceiver(user.id, target.id);
+        }
+
+        // Remove friendship
+        await this.friendRequestRepository.deleteById(friendship.id);
+        
+        // Return response date
+        return { message: `The friendship between users with ids ${user.id} and ${target.id} no longer exists.` };
+    }
 }

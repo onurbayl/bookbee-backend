@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Brackets, DataSource, Repository } from "typeorm";
+import { Brackets, DataSource, DeleteResult, Repository } from "typeorm";
 import { FriendRequest } from "./friend-request.entity";
 
 
@@ -30,5 +30,13 @@ export class FriendRequestRepository extends Repository<FriendRequest>{
             .where('sender.id = :i_sender', { i_sender: senderId })
             .andWhere('receiver.id = :i_receiver', { i_receiver: receiverId })
             .getOne();
+    }
+
+    async deleteById(friendRequestId: number): Promise<DeleteResult> {
+        return this.createQueryBuilder('friendRequest')
+            .delete()
+            .from(FriendRequest)
+            .where('id = :i_friendRequest', { i_friendRequest: friendRequestId })
+            .execute()
     }
 }
