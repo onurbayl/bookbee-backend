@@ -18,6 +18,8 @@ export class CreateUserDto {
     @IsNotEmpty()
     @IsString()
     uid: string; // Firebase UID
+
+    favoriteGenres: number[];
   
     /* @IsOptional()
     @IsString()
