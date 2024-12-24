@@ -13,12 +13,17 @@ import { UserBadRequestException } from './exceptions/user-bad-request.exception
 import { UserUnauthorizedException } from './exceptions/user-unauthorized.exception';
 import { ShoppingCart } from '../shopping-cart/shopping-cart.entity';
 import { ShoppingCartRepository } from '../shopping-cart/shopping-cart.repository';
+import { GenreRepository } from '../genre/genre.repository';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor( //Injects repositories that you want to use
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
+
+    @InjectRepository(GenreRepository)
+    private readonly genreRepository: GenreRepository,
 
     @InjectRepository(ShoppingCartRepository)
     private readonly shoppingCartRepository: ShoppingCartRepository,
@@ -124,7 +129,7 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto) {
-    const { name, email, description, uid } = createUserDto;
+    const { name, email, description, uid, favoriteGenres } = createUserDto;
 
     const firebaseUser = await firebaseAdmin.auth().getUser(uid);
     if(!firebaseUser){
@@ -153,6 +158,12 @@ export class UserService {
     newUser.imagePath = '';
     newUser.balance = 0;
     newUser.isDeleted = false;
+
+    // Associate favorite genres
+    if (favoriteGenres && favoriteGenres.length > 0) {
+      const genres = await this.genreRepository.findBy({ id: In(favoriteGenres) })
+      newUser.favoriteGenres = genres;
+    }
 
     // Save user to the database
     const savedUser = await this.userRepository.save(newUser);
