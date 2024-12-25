@@ -6,6 +6,15 @@ import { ReviewWithLikeDislikeDto } from "./dtos/review-with-like-dislike-dto";
 @Controller('api/v1/review')
 export class ReviewController {
     constructor(private readonly reviewService: ReviewService) {}
+  
+    @Delete('delete-review/:bookId/:userId')
+    @UseGuards(AuthGuard)
+    async DeleteReview(@Param('bookId') bookId: number, @Param('userId') userId: number, @Request() req){
+        const isAdmin = req.user.role === 'admin';
+        const uId = req.user.uid;
+        const result = this.reviewService.deleteReview(uId, bookId, userId, isAdmin);
+        return result;
+    }
 
     @Post('add-review/:bookId')
     @UseGuards(AuthGuard)

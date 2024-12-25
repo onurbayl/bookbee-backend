@@ -9,6 +9,7 @@ import { Review } from "./review.entity";
 import { ReviewNotFoundException } from "./exceptions/review-not-found.exception";
 import { ReviewWithLikeDislikeDto } from "./dtos/review-with-like-dislike-dto";
 import { ReviewLikeDislikeRepository } from "../review-like-dislike/review-like-dislike.repository";
+import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 
 @Injectable()
 export class ReviewService {
@@ -25,6 +26,33 @@ export class ReviewService {
         @InjectRepository(ReviewLikeDislikeRepository)
         private readonly reviewLikeDislikeRepository: ReviewLikeDislikeRepository
     ) {}
+
+    async deleteReview(uId: string, bookId: number, userId: number, isAdmin: boolean){
+
+        const user = await this.userRepository.findById(userId);
+        if(user == null){
+            UserNotFoundException.byId(userId);
+        }
+
+        if(uId !== user.uid && !isAdmin){
+            UserUnauthorizedException.byNotPermitted();
+        }
+      
+        const book = await this.bookRepository.findById(bookId);
+        if(book == null){
+            BookNotFoundException.byId(bookId);
+        }
+      
+        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id);
+      
+        if(review == null){
+            ReviewNotFoundException.byBookAndUser(bookId, user.id);
+        }
+
+        await this.reviewRepository.delete(review);
+
+        return { message: 'This review by the user ' + userId + ' was removed.' }
+    }
 
     async addReview(bookId: number, userUId: string, score: number, content: string){
 
@@ -132,17 +160,17 @@ export class ReviewService {
         if(user == null){
             UserNotFoundException.byUId();
         }
-  
+      
         const book = await this.bookRepository.findById(bookId);
         if(book == null){
             BookNotFoundException.byId(bookId);
         }
 
-        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id);
-
         if (!review) {
             ReviewNotFoundException.byBookAndUser(bookId, user.id);
         }
+
+        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id);
 
         let reviewDto = new ReviewWithLikeDislikeDto();
         reviewDto.id = review.id;
