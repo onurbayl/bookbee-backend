@@ -32,6 +32,11 @@ export class ReviewService {
         if(user == null){
             UserNotFoundException.byUId();
         }
+
+        const book = await this.bookRepository.findById(bookId);
+        if(book == null){
+            BookNotFoundException.byId(bookId);
+        }
       
         if(score == null || content == null){
             ReviewNotFoundException.byScoreOrContent();
