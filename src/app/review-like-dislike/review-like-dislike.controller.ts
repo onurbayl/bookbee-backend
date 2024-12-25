@@ -8,10 +8,9 @@ export class ReviewLikeDislikeController {
 
     @Post('add-like/:reviewId')
     @UseGuards(AuthGuard)
-    async AddLike(@Param('reviewId') reviewId: number, @Request() req, @Body() body: { likeDislike: number }){
+    async AddLike(@Param('reviewId') reviewId: number, @Request() req){
         const uId = req.user.uid;
-        const {likeDislike} = body;
-        const result = this.reviewLikeDislikeService.addLike(uId, reviewId, likeDislike);
+        const result = this.reviewLikeDislikeService.addLike(uId, reviewId);
         return result;
     }
 

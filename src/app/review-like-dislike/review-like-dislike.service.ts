@@ -21,7 +21,7 @@ export class ReviewLikeDislikeService {
         private readonly reviewRepository: ReviewRepository
     ) {}
 
-    async addLike(userUId: string, reviewId: number, likeDislike: number){
+    async addLike(userUId: string, reviewId: number){
 
         const user = await this.userRepository.findByUId(userUId);
         if(user == null){
@@ -31,10 +31,6 @@ export class ReviewLikeDislikeService {
         const review = await this.reviewRepository.findById(reviewId);
         if(review == null){
             ReviewNotFoundException.byId(reviewId);
-        }
-
-        if (![1].includes(likeDislike)) {
-            ReviewLikeDislikeNotFoundException.invalidLikeDislike();
         }
 
         let existingRecord = await this.reviewLikeDislikeRepository.findByReviewAndUser(reviewId, user.id);
