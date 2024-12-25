@@ -7,8 +7,7 @@ export class ReviewController {
     constructor(private readonly reviewService: ReviewService) {}
 
     @Get('get-last-ten-reviews/:userId')
-    async GetLastTenComments(@Request() req, @Param('userId') userId: number){
-        const uId = req.user.uid;
+    async GetLastTenComments(@Param('userId') userId: number){
         const result = this.reviewService.getLastTenReviews(userId);
         return result;
     }
