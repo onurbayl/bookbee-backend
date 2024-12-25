@@ -3,13 +3,12 @@ import { CommentRepository } from "./comment.repository";
 import { ReviewRepository } from "../review/review.repository";
 import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
-import { ReviewNotFoundException } from "../review/exceptions/review-not-found-exception";
+import { ReviewNotFoundException } from "../review/exceptions/review-not-found.exception";
 import { Comment } from "./comment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommentNotFoundException } from "./exceptions/comment-not-found.exception";
 import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 import { CommentLikeDislikeRepository } from "../comment-like-dislike/comment-like-dislike.repository";
-import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 
 @Injectable()
 export class CommentService {
