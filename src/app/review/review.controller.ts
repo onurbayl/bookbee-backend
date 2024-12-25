@@ -15,7 +15,13 @@ export class ReviewController {
         const result = this.reviewService.deleteReview(uId, bookId, userId, isAdmin);
         return result;
     }
-
+  
+    @Get('get-last-ten-reviews/:userId')
+    async GetLastTenComments(@Param('userId') userId: number){
+        const result = this.reviewService.getLastTenReviews(userId);
+        return result;
+    }
+  
     @Post('add-review/:bookId')
     @UseGuards(AuthGuard)
     async AddReview(@Param('bookId') bookId: number, @Request() req, @Body() body: ReviewWithLikeDislikeDto){

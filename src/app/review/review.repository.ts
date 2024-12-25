@@ -25,6 +25,15 @@ export class ReviewRepository extends Repository<Review> {
         .getMany();
     }
 
+    async GetTenLast(userId: number): Promise<Review[]> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .where('user.id = :i_user', {i_user: userId})
+        .orderBy('comment.dateCreated', 'DESC')
+        .take(10)
+        .getMany();
+    }
+    
     async findById(reviewId: number): Promise<Review | undefined> {
         return this.createQueryBuilder('review')
         .leftJoin('review.user', 'user')
