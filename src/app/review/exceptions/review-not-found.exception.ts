@@ -13,4 +13,8 @@ export class ReviewNotFoundException extends HttpException {
     throw new ReviewNotFoundException(`Review for book ID ${bookId} and user ID ${userId} not found`, HttpStatus.NOT_FOUND)
   }
 
+  static byBook( bookId: number ) {
+    throw new ReviewNotFoundException(`Reviews at book ${bookId} not found`, HttpStatus.NOT_FOUND)
+  }
+
 }
