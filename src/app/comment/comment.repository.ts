@@ -8,6 +8,31 @@ export class CommentRepository extends Repository<Comment> {
         super(Comment, dataSource.createEntityManager());
     }
     
-    //Add custom repositories
+    async GetTenLast(userId: number): Promise<Comment[]> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .where('user.id = :i_user', {i_user: userId})
+        .orderBy('comment.dateCreated', 'DESC')
+        .take(10)
+        .getMany();
+    }
+    
+    async findByReview(review_id: number): Promise<Comment[]> {
+        return this.createQueryBuilder('comment')
+        .leftJoinAndSelect('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .where('review.id = :i_review', {i_review: review_id})
+        .getMany();
+    }
+    
+    async findByUser(userId: number): Promise<Comment[]> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .addSelect('review.id')
+        .where('user.id = :i_user', {i_user: userId})
+        .getMany();
+    }
 
 }
