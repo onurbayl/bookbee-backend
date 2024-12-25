@@ -8,6 +8,18 @@ export class CommentLikeDislikeRepository extends Repository<CommentLikeDislike>
         super(CommentLikeDislike, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async getLikeCount(comment_id: number): Promise<number> {
+        return this.createQueryBuilder('comment-like-dislike')
+        .where('comment-like-dislike.comment_id = :comment_id', { comment_id })
+        .andWhere('comment-like-dislike.likeDislike = :likeValue', { likeValue: 1 })
+        .getCount();
+    }
+
+    async getDislikeCount(comment_id: number): Promise<number> {
+        return this.createQueryBuilder('comment-like-dislike')
+        .where('comment-like-dislike.comment_id = :comment_id', { comment_id })
+        .andWhere('comment-like-dislike.likeDislike = :dislikeValue', { dislikeValue: -1 })
+        .getCount();
+    }
 
 }
