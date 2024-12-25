@@ -7,7 +7,15 @@ export class CommentRepository extends Repository<Comment> {
     constructor(private readonly  dataSource: DataSource) {
         super(Comment, dataSource.createEntityManager());
     }
-    
+
+    async findById(commentId: number): Promise<Comment | undefined> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .where('comment.id = :i_comment', {i_comment: commentId})
+        .getOne();
+    }
+
     async GetTenLast(userId: number): Promise<Comment[]> {
         return this.createQueryBuilder('comment')
         .leftJoin('comment.user', 'user')

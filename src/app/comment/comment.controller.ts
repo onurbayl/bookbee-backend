@@ -13,6 +13,15 @@ export class CommentController {
         return result;
     }
 
+    @Delete('delete-comment/:commentId')
+    @UseGuards(AuthGuard)
+    async DeleteComment(@Param('commentId') commentId: number, @Request() req){
+        const isAdmin = req.user.role === 'admin';
+        const uId = req.user.uid;
+        const result = this.commentService.deleteComment(uId, commentId, isAdmin);
+        return result;
+    }
+  
     @Post('add-comment/:reviewId')
     @UseGuards(AuthGuard)
     async AddReview(@Param('reviewId') reviewId: number, @Request() req, @Body() body: CommentWithLikeDislikeDto){

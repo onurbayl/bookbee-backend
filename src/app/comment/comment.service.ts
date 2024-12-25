@@ -6,7 +6,8 @@ import { UserNotFoundException } from "../user/exceptions/user-not-found.excepti
 import { ReviewNotFoundException } from "../review/exceptions/review-not-found.exception";
 import { Comment } from "./comment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommentNotFoundException } from "./exceptions/comment-not-found.exception";
+import { CommentNotFoundException } from "./exceptions/comment-not-found-exception";
+import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 import { CommentLikeDislikeRepository } from "../comment-like-dislike/comment-like-dislike.repository";
 
@@ -143,6 +144,23 @@ export class CommentService {
         comment.dateCreated = new Date();
 
         return await this.commentRepository.save(comment);
+    }
+
+    async deleteComment(uId: string, commentId: number, isAdmin: boolean){
+
+        let comment = await this.commentRepository.findById(commentId);
+
+        if(comment == null){
+            CommentNotFoundException.byId(commentId);
+        }
+        
+        if(uId !== comment.user.uid && !isAdmin){
+            UserUnauthorizedException.byNotPermitted();
+        }
+
+        await this.commentRepository.delete(comment);
+
+        return { message: 'This comment with ID ' + commentId + ' was removed.' }
     }
 
 }
