@@ -9,8 +9,9 @@ export class CommentController {
     @Delete('delete-comment/:commentId')
     @UseGuards(AuthGuard)
     async DeleteComment(@Param('commentId') commentId: number, @Request() req){
+        const isAdmin = req.user.role === 'admin';
         const uId = req.user.uid;
-        const result = this.commentService.deleteComment(commentId);
+        const result = this.commentService.deleteComment(uId, commentId, isAdmin);
         return result;
     }
 
