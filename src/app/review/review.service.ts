@@ -7,6 +7,7 @@ import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { Review } from "./review.entity";
 import { ReviewNotFoundException } from "./exceptions/review-not-found-exception";
+import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 
 @Injectable()
 export class ReviewService {
@@ -21,11 +22,15 @@ export class ReviewService {
         private readonly userRepository: UserRepository
     ) {}
 
-    async deleteReview(bookId: number, userId: number){
+    async deleteReview(uId: string, bookId: number, userId: number, isAdmin: boolean){
 
         const user = await this.userRepository.findById(userId);
         if(user == null){
             UserNotFoundException.byId(userId);
+        }
+
+        if(uId !== user.uid && !isAdmin){
+            UserUnauthorizedException.byNotPermitted();
         }
 
         const book = await this.bookRepository.findById(bookId);

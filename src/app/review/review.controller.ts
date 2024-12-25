@@ -9,8 +9,9 @@ export class ReviewController {
     @Delete('delete-review/:bookId/:userId')
     @UseGuards(AuthGuard)
     async DeleteReview(@Param('bookId') bookId: number, @Param('userId') userId: number, @Request() req){
+        const isAdmin = req.user.role === 'admin';
         const uId = req.user.uid;
-        const result = this.reviewService.deleteReview(bookId, userId);
+        const result = this.reviewService.deleteReview(uId, bookId, userId, isAdmin);
         return result;
     }
 
