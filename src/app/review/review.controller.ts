@@ -9,23 +9,13 @@ export class ReviewController {
 
     @Post('add-review/:bookId')
     @UseGuards(AuthGuard)
-    async AddReview(@Param('bookId') bookId: number, @Request() req, @Body() body: { score: number; content: string }){
+    async AddReview(@Param('bookId') bookId: number, @Request() req, @Body() body: ReviewWithLikeDislikeDto){
         const uId = req.user.uid;
-        const {score, content} = body;
+        const score = body.score;
+        const content = body.content;
         const review = await this.reviewService.addReview(bookId, uId, score, content);
 
-        const reviewDto = new ReviewWithLikeDislikeDto;
-
-        reviewDto.id = review.id;
-        reviewDto.user = review.user;
-        reviewDto.book = review.book;
-        reviewDto.score = review.score;
-        reviewDto.content = review.content;
-        reviewDto.likeCount = 0; //As it will be a new review.
-        reviewDto.dislikeCount = 0; //As it will be a new review.
-        reviewDto.dateCreated = review.dateCreated;
-
-        return reviewDto;
+        return review;
     }
 
 }

@@ -6,7 +6,7 @@ import { BookNotFoundException } from "../book/exceptions/book-not-found.excepti
 import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { Review } from "./review.entity";
-import { ReviewNotFoundException } from "./exceptions/review-not-found-exception";
+import { ReviewNotFoundException } from "./exceptions/review-not-found.exception";
 @Injectable()
 export class ReviewService {
     constructor( //Injects repositories that you want to use
