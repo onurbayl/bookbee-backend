@@ -6,7 +6,7 @@ import { UserNotFoundException } from "../user/exceptions/user-not-found.excepti
 import { ReviewNotFoundException } from "../review/exceptions/review-not-found.exception";
 import { Comment } from "./comment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommentNotFoundException } from "./exceptions/comment-not-found-exception";
+import { CommentNotFoundException } from "./exceptions/comment-not-found.exception";
 import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 import { CommentLikeDislikeRepository } from "../comment-like-dislike/comment-like-dislike.repository";
