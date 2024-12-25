@@ -26,13 +26,44 @@ export class ReviewService {
         private readonly reviewLikeDislikeRepository: ReviewLikeDislikeRepository
     ) {}
 
+    async addReview(bookId: number, userUId: string, score: number, content: string){
+
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+      
+        if(score == null || content == null){
+            ReviewNotFoundException.byScoreOrContent();
+        }
+
+        if(score > 10 || score < 0){
+            ReviewNotFoundException.invalidScore();
+        }
+
+        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id)
+
+        if(review){
+            ReviewNotFoundException.reviewExists(bookId, user.id);   
+        }
+
+        review = new Review();
+        review.user = user;
+        review.book = book;
+        review.score = score;
+        review.content = content;
+        review.dateCreated = new Date();
+
+        return await this.reviewRepository.save(review);
+    }
+
     async getReviewsByBook(bookId: number){
 
         const book = await this.bookRepository.findById(bookId);
         if(book == null){
             BookNotFoundException.byId(bookId);
         }
-
+  
         let reviews = await this.reviewRepository.findByBook(bookId);
 
         if (!reviews) {
