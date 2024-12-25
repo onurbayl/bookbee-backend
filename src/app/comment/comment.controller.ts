@@ -7,8 +7,7 @@ export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
     @Get('get-last-ten-comments/:userId')
-    async GetLastTenComments(@Request() req, @Param('userId') userId: number){
-        const uId = req.user.uid;
+    async GetLastTenComments(@Param('userId') userId: number){
         const result = this.commentService.getLastTenComments(userId);
         return result;
     }
