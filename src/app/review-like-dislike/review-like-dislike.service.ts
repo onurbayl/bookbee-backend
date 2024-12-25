@@ -41,7 +41,7 @@ export class ReviewLikeDislikeService {
         }
         
         if(existingRecord && existingRecord.likeDislike == -1){
-            existingRecord.likeDislike = likeDislike;
+            existingRecord.likeDislike = 1;
             await this.reviewLikeDislikeRepository.save(existingRecord);
             return { message: 'A record has been changed as it had been -1.' };
         }
