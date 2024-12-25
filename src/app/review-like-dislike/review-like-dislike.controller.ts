@@ -6,6 +6,14 @@ import { AuthGuard } from "src/guards/auth.guard";
 export class ReviewLikeDislikeController {
     constructor(private readonly reviewLikeDislikeService: ReviewLikeDislikeService) {}
 
+    @Post('add-dislike/:reviewId')
+    @UseGuards(AuthGuard)
+    async AddDislike(@Param('reviewId') reviewId: number, @Request() req){
+        const uId = req.user.uid;
+        const result = this.reviewLikeDislikeService.addDislike(uId, reviewId);
+        return result;
+    }
+
     @Post('add-like/:reviewId')
     @UseGuards(AuthGuard)
     async AddLike(@Param('reviewId') reviewId: number, @Request() req){

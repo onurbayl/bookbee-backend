@@ -30,5 +30,4 @@ export class ReviewLikeDislikeRepository extends Repository<ReviewLikeDislike> {
         .andWhere('user.id = :i_user', { i_user: userId })
         .getOne();
     }
-    
 }
