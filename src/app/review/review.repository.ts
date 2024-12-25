@@ -33,13 +33,4 @@ export class ReviewRepository extends Repository<Review> {
         .getMany();
     }
 
-    async findByBookAndUser(bookId: number, userId: number): Promise<Review | undefined> {
-        return this.createQueryBuilder('review')
-        .leftJoinAndSelect('review.user', 'user')
-        .leftJoinAndSelect('review.book', 'book')
-        .where('book.id = :i_book', { i_book: bookId })
-        .andWhere('user.id = :i_user', { i_user: userId })
-        .getOne();
-    }
-
 }

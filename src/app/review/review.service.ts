@@ -166,11 +166,11 @@ export class ReviewService {
             BookNotFoundException.byId(bookId);
         }
 
+        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id);
+
         if (!review) {
             ReviewNotFoundException.byBookAndUser(bookId, user.id);
         }
-
-        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id);
 
         let reviewDto = new ReviewWithLikeDislikeDto();
         reviewDto.id = review.id;
