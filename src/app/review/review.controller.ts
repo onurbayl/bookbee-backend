@@ -7,8 +7,7 @@ export class ReviewController {
     constructor(private readonly reviewService: ReviewService) {}
 
     @Get('get-reviews-book/:bookId')
-    async getReviewsByBook(@Param('bookId') bookId: number, @Request() req){
-        const uId = req.user.uid;
+    async getReviewsByBook(@Param('bookId') bookId: number){
         const result = this.reviewService.getReviewsByBook(bookId);
         return result;
     }
