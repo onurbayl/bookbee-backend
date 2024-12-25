@@ -5,6 +5,8 @@ import { UserNotFoundException } from "../user/exceptions/user-not-found.excepti
 import { Comment } from "./comment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommentNotFoundException } from "./exceptions/comment-not-found-exception";
+import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
+import { CommentLikeDislikeRepository } from "../comment-like-dislike/comment-like-dislike.repository";
 
 @Injectable()
 export class CommentService {
@@ -14,13 +16,16 @@ export class CommentService {
 
         @InjectRepository(UserRepository)
         private readonly userRepository: UserRepository,
+
+        @InjectRepository(CommentLikeDislikeRepository)
+        private readonly commentLikeDislikeRepository: CommentLikeDislikeRepository
     ) {}
 
-    async getLastTenComments(userUId: string){
+    async getLastTenComments(userId: number){
 
-        const user = await this.userRepository.findByUId(userUId);
+        const user = await this.userRepository.findById(userId);
         if(user == null){
-            UserNotFoundException.byUId();
+            UserNotFoundException.byId(userId);
         }
 
         let comments = await this.commentRepository.GetTenLast(user.id);
@@ -29,7 +34,22 @@ export class CommentService {
             CommentNotFoundException.byUser(user.id);
         }
 
-        return comments;
+        let commentsDto: CommentWithLikeDislikeDto[] = [];
+
+        for (const comment of comments){
+
+            let commentDto = new CommentWithLikeDislikeDto();
+            commentDto.id = comment.id;
+            commentDto.user = comment.user;
+            commentDto.review = comment.review;
+            commentDto.content = comment.content;
+            commentDto.likeCount = await this.commentLikeDislikeRepository.getLikeCount(comment.id);
+            commentDto.dislikeCount = await this.commentLikeDislikeRepository.getDislikeCount(comment.id);
+
+            commentsDto.push(commentDto);
+        }
+        
+        return commentsDto;
 
     }
 
