@@ -7,6 +7,8 @@ import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { Review } from "./review.entity";
 import { ReviewNotFoundException } from "./exceptions/review-not-found-exception";
+import { ReviewWithLikeDislikeDto } from "./dtos/review-with-like-dislike-dto";
+import { ReviewLikeDislikeRepository } from "../review-like-dislike/review-like-dislike.repository";
 
 @Injectable()
 export class ReviewService {
@@ -18,7 +20,10 @@ export class ReviewService {
         private readonly bookRepository: BookRepository,
 
         @InjectRepository(UserRepository)
-        private readonly userRepository: UserRepository
+        private readonly userRepository: UserRepository,
+
+        @InjectRepository(ReviewLikeDislikeRepository)
+        private readonly reviewLikeDislikeRepository: ReviewLikeDislikeRepository
     ) {}
 
     async getReviewsByBook(bookId: number){
@@ -28,13 +33,29 @@ export class ReviewService {
             BookNotFoundException.byId(bookId);
         }
 
-        let review = await this.reviewRepository.findByBook(bookId);
+        let reviews = await this.reviewRepository.findByBook(bookId);
 
-        if (!review) {
+        if (!reviews) {
             ReviewNotFoundException.byBook(bookId);
         }
         
-        return review;
+        let reviewsDto: ReviewWithLikeDislikeDto[] = [];
+
+        for (const review of reviews){
+
+            let reviewDto = new ReviewWithLikeDislikeDto();
+            reviewDto.id = review.id;
+            reviewDto.user = review.user;
+            reviewDto.book = review.book;
+            reviewDto.score = review.score;
+            reviewDto.content = review.content;
+            reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
+            reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+
+            reviewsDto.push(reviewDto);
+        }
+        
+        return reviewsDto;
 
     }
 
