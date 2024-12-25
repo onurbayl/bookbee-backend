@@ -8,6 +8,15 @@ export class GenreRepository extends Repository<Genre> {
         super(Genre, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async findGenre(id: number): Promise<Genre | undefined> { 
+        return await this.createQueryBuilder('genre')
+        .where( 'genre.id = :id', { id: id} )
+        .getOne();
+    }
+
+    async findAll(): Promise<Genre[] | undefined> {
+            return await this.createQueryBuilder('genre')
+            .getMany();
+    }
 
 }

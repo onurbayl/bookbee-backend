@@ -5,11 +5,12 @@ import { BookController } from './book.controller';
 import { BookService } from './book.service';
 import { BookRepository } from './book.repository';
 import { UserModule } from '../user/user.module';
+import { GenreModule } from '../genre/genre.module' 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Book]), UserModule], //If you need UserRepository, import UserModule
+  imports: [TypeOrmModule.forFeature([Book]), UserModule, GenreModule],
   controllers: [BookController],
   providers: [BookService, BookRepository],
-  exports: [BookRepository], //For sharing repository layer
+  exports: [BookRepository],
 })
 export class BookModule {}
