@@ -1,10 +1,17 @@
 import { Controller } from "@nestjs/common";
 import { ReviewService } from "./review.service";
+import { AuthGuard } from "src/guards/auth.guard";
 
 @Controller('api/v1/review')
 export class ReviewController {
     constructor(private readonly reviewService: ReviewService) {}
 
-    //Add api endpoints
+    @Get('get-reviews-user')
+    @UseGuards(AuthGuard)
+    async getReviewsByUser(@Request() req){
+        const uId = req.user.uid;
+        const result = this.reviewService.getReviewsByUser(uId);
+        return result;
+    }
 
 }
