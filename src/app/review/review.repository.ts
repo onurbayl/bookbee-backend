@@ -8,7 +8,7 @@ export class ReviewRepository extends Repository<Review> {
         super(Review, dataSource.createEntityManager());
     }
 
-    async findByBookAndUser(bookId: number, userId: number): Promise<Review> {
+    async findByBookAndUser(bookId: number, userId: number): Promise<Review | undefined> {
         return this.createQueryBuilder('review')
         .leftJoinAndSelect('review.user', 'user')
         .leftJoinAndSelect('review.book', 'book')
