@@ -13,4 +13,8 @@ export class ReviewNotFoundException extends HttpException {
     throw new ReviewNotFoundException(`Review does not contain a score or a content`, HttpStatus.NOT_FOUND)
   }
 
+  static invalidScore() {
+    throw new ReviewNotFoundException(`Given score is an invalid value`, HttpStatus.NOT_FOUND)
+  }
+
 }

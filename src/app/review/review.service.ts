@@ -36,6 +36,10 @@ export class ReviewService {
             ReviewNotFoundException.byScoreOrContent();
         }
 
+        if(score > 10 || score < 0){
+            ReviewNotFoundException.invalidScore();
+        }
+
         let review = await this.reviewRepository.findByBookAndUser(bookId, user.id)
 
         if(review){
