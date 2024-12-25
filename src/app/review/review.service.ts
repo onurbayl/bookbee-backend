@@ -6,7 +6,7 @@ import { BookNotFoundException } from "../book/exceptions/book-not-found.excepti
 import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { Review } from "./review.entity";
-import { ReviewNotFoundException } from "./exceptions/review-not-found.exception";
+import { ReviewNotFoundException } from "./exceptions/review-not-found-exception";
 import { ReviewWithLikeDislikeDto } from "./dtos/review-with-like-dislike-dto";
 import { ReviewLikeDislikeRepository } from "../review-like-dislike/review-like-dislike.repository";
 
@@ -26,19 +26,19 @@ export class ReviewService {
         private readonly reviewLikeDislikeRepository: ReviewLikeDislikeRepository
     ) {}
 
-    async getReviewsByUser(userUId: string){
-      
-        const user = await this.userRepository.findByUId(userUId);
-        if(user == null){
-            UserNotFoundException.byUId();
+    async getReviewsByBook(bookId: number){
+
+        const book = await this.bookRepository.findById(bookId);
+        if(book == null){
+            BookNotFoundException.byId(bookId);
         }
 
-        let reviews = await this.reviewRepository.findByUser(user.id);
+        let reviews = await this.reviewRepository.findByBook(bookId);
 
         if (!reviews) {
-            ReviewNotFoundException.byUser(user.id);
+            ReviewNotFoundException.byBook(bookId);
         }
-
+      
         let reviewsDto: ReviewWithLikeDislikeDto[] = [];
 
         for (const review of reviews){
@@ -54,10 +54,42 @@ export class ReviewService {
 
             reviewsDto.push(reviewDto);
         }
-        
+      
         return reviewsDto;
     }
+
+    async getReviewsByUser(userUId: string){
       
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+
+        let reviews = await this.reviewRepository.findByUser(user.id);
+
+        if (!reviews) {
+            ReviewNotFoundException.byUser(user.id);
+        }
+  
+        let reviewsDto: ReviewWithLikeDislikeDto[] = [];
+
+        for (const review of reviews){
+
+            let reviewDto = new ReviewWithLikeDislikeDto();
+            reviewDto.id = review.id;
+            reviewDto.user = review.user;
+            reviewDto.book = review.book;
+            reviewDto.score = review.score;
+            reviewDto.content = review.content;
+            reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
+            reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+
+            reviewsDto.push(reviewDto);
+        }
+  
+        return reviewsDto;
+    }
+
     async getReview(bookId: number, userUId: string){
   
         const user = await this.userRepository.findByUId(userUId);
