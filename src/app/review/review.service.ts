@@ -27,7 +27,7 @@ export class ReviewService {
     ) {}
 
     async getReviewsByUser(userUId: string){
-
+      
         const user = await this.userRepository.findByUId(userUId);
         if(user == null){
             UserNotFoundException.byUId();
@@ -56,7 +56,36 @@ export class ReviewService {
         }
         
         return reviewsDto;
+    }
+      
+    async getReview(bookId: number, userUId: string){
+  
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+  
+        const book = await this.bookRepository.findById(bookId);
+        if(book == null){
+            BookNotFoundException.byId(bookId);
+        }
 
+        let review = await this.reviewRepository.findByBookAndUser(bookId, user.id);
+
+        if (!review) {
+            ReviewNotFoundException.byBookAndUser(bookId, user.id);
+        }
+
+        let reviewDto = new ReviewWithLikeDislikeDto();
+        reviewDto.id = review.id;
+        reviewDto.user = review.user;
+        reviewDto.book = review.book;
+        reviewDto.score = review.score;
+        reviewDto.content = review.content;
+        reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
+        reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+        
+        return reviewDto;
     }
 
 }
