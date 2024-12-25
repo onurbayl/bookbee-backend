@@ -14,4 +14,12 @@ export class ReviewLikeDislikeController {
         return result;
     }
 
+    @Post('add-like/:reviewId')
+    @UseGuards(AuthGuard)
+    async AddLike(@Param('reviewId') reviewId: number, @Request() req){
+        const uId = req.user.uid;
+        const result = this.reviewLikeDislikeService.addLike(uId, reviewId);
+        return result;
+    }
+
 }
