@@ -7,7 +7,6 @@ export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
     @Get('get-comments-by-review/:reviewId')
-    @UseGuards(AuthGuard)
     async GetCommentsByReview(@Param('reviewId') reviewId: number, @Request() req){
         const uId = req.user.uid;
         const result = this.commentService.getCommentsByReview(reviewId);
