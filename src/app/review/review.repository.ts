@@ -25,6 +25,14 @@ export class ReviewRepository extends Repository<Review> {
         .getMany();
     }
 
+    async findById(reviewId: number): Promise<Review | undefined> {
+        return this.createQueryBuilder('review')
+        .leftJoin('review.user', 'user')
+        .leftJoin('review.book', 'book')
+        .where('review.id = :i_review', {i_review: reviewId})
+        .getOne();
+    }
+    
     async findByUser(userId: number): Promise<Review[]> {
         return this.createQueryBuilder('review')
         .leftJoin('review.user', 'user')

@@ -6,6 +6,12 @@ import { AuthGuard } from "src/guards/auth.guard";
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
+    @Get('get-comments-by-review/:reviewId')
+    async GetCommentsByReview(@Param('reviewId') reviewId: number){
+        const result = this.commentService.getCommentsByReview(reviewId);
+        return result;
+    }
+
     @Get('get-comments-by-user/')
     @UseGuards(AuthGuard)
     async GetCommentsByUser(@Request() req){

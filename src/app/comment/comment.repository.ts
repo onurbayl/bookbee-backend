@@ -8,6 +8,14 @@ export class CommentRepository extends Repository<Comment> {
         super(Comment, dataSource.createEntityManager());
     }
     
+    async findByReview(review_id: number): Promise<Comment[]> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .where('review.id = :i_review', {i_review: review_id})
+        .getMany();
+    }
+    
     async findByUser(userId: number): Promise<Comment[]> {
         return this.createQueryBuilder('comment')
         .leftJoin('comment.user', 'user')
