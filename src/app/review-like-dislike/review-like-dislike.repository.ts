@@ -18,7 +18,7 @@ export class ReviewLikeDislikeRepository extends Repository<ReviewLikeDislike> {
     async getDislikeCount(review_id: number): Promise<number> {
         return this.createQueryBuilder('review-like-dislike')
         .where('review-like-dislike.review_id = :review_id', { review_id })
-        .andWhere('review-like-dislike.likeDislike = :likeValue', { likeValue: 1 })
+        .andWhere('review-like-dislike.likeDislike = :dislikeValue', { dislikeValue: -1 })
         .getCount();
     }
 
