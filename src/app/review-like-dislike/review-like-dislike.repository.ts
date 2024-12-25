@@ -8,6 +8,18 @@ export class ReviewLikeDislikeRepository extends Repository<ReviewLikeDislike> {
         super(ReviewLikeDislike, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async getLikeCount(review_id: number): Promise<number> {
+        return this.createQueryBuilder('review-like-dislike')
+        .where('review-like-dislike.review_id = :review_id', { review_id })
+        .andWhere('review-like-dislike.likeDislike = :likeValue', { likeValue: 1 })
+        .getCount();
+    }
+
+    async getDislikeCount(review_id: number): Promise<number> {
+        return this.createQueryBuilder('review-like-dislike')
+        .where('review-like-dislike.review_id = :review_id', { review_id })
+        .andWhere('review-like-dislike.likeDislike = :likeValue', { likeValue: 1 })
+        .getCount();
+    }
 
 }
