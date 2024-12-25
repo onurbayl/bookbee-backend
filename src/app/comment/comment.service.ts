@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { CommentRepository } from "./comment.repository";
-import { ReviewRepository } from "../review/review.repository";
 import { UserRepository } from "../user/user.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
+import { ReviewRepository } from "../review/review.repository";
 import { ReviewNotFoundException } from "../review/exceptions/review-not-found.exception";
 import { Comment } from "./comment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -87,7 +87,37 @@ export class CommentService {
         }
         
         return commentsDto;
+    }
 
+    async getLastTenComments(userId: number){
+
+        const user = await this.userRepository.findById(userId);
+        if(user == null){
+            UserNotFoundException.byId(userId);
+        }
+
+        let comments = await this.commentRepository.GetTenLast(user.id);
+
+        if (!comments){
+            CommentNotFoundException.byUser(user.id);
+        }
+
+        let commentsDto: CommentWithLikeDislikeDto[] = [];
+
+        for (const comment of comments){
+
+            let commentDto = new CommentWithLikeDislikeDto();
+            commentDto.id = comment.id;
+            commentDto.user = comment.user;
+            commentDto.review = comment.review;
+            commentDto.content = comment.content;
+            commentDto.likeCount = await this.commentLikeDislikeRepository.getLikeCount(comment.id);
+            commentDto.dislikeCount = await this.commentLikeDislikeRepository.getDislikeCount(comment.id);
+
+            commentsDto.push(commentDto);
+        }
+        
+        return commentsDto;
     }
 
 }
