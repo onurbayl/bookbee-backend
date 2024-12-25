@@ -10,22 +10,11 @@ export class CommentController {
 
     @Post('add-comment/:reviewId')
     @UseGuards(AuthGuard)
-    async AddReview(@Param('reviewId') reviewId: number, @Request() req, @Body() body: { content: string }){
+    async AddReview(@Param('reviewId') reviewId: number, @Request() req, @Body() body: CommentWithLikeDislikeDto){
         const uId = req.user.uid;
-        const {content} = body;
+        const content = body.content;
         const comment = await this.commentService.addComment(reviewId, uId, content);
-
-        const commentDto = new CommentWithLikeDislikeDto;
-
-        commentDto.id = comment.id;
-        commentDto.user = comment.user;
-        commentDto.review = comment.review;
-        commentDto.content = comment.content;
-        commentDto.likeCount = 0; //As it will be a new comment.
-        commentDto.dislikeCount = 0; //As it will be a new comment.
-        commentDto.dateCreated = comment.dateCreated;
-
-        return commentDto;
+        return comment;
     }
 
 }
