@@ -14,8 +14,10 @@ export class CommentService {
         @InjectRepository(CommentRepository)
         private readonly commentRepository: CommentRepository,
 
+        @InjectRepository(UserRepository)
         private readonly userRepository: UserRepository,
 
+        @InjectRepository(ReviewRepository)
         private readonly reviewRepository: ReviewRepository
     ) {}
 
