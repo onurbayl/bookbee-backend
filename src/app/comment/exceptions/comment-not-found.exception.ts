@@ -9,4 +9,8 @@ export class CommentNotFoundException extends HttpException {
     throw new CommentNotFoundException(`Comment for review ${reviewId} not found`, HttpStatus.NOT_FOUND)
   }
 
+  static byUser( userId: number ) {
+    throw new CommentNotFoundException(`Comment for user ${userId} not found`, HttpStatus.NOT_FOUND)
+  }
+
 }

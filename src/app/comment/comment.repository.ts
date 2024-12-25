@@ -15,5 +15,14 @@ export class CommentRepository extends Repository<Comment> {
         .where('review.id = :i_review', {i_review: review_id})
         .getMany();
     }
+    
+    async findByUser(userId: number): Promise<Comment[]> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .addSelect('review.id')
+        .where('user.id = :i_user', {i_user: userId})
+        .getMany();
+    }
 
 }

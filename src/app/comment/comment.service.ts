@@ -9,7 +9,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { CommentNotFoundException } from "./exceptions/comment-not-found.exception";
 import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 import { CommentLikeDislikeRepository } from "../comment-like-dislike/comment-like-dislike.repository";
-
+import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 
 @Injectable()
 export class CommentService {
@@ -19,11 +19,14 @@ export class CommentService {
 
         @InjectRepository(ReviewRepository)
         private readonly reviewRepository: ReviewRepository,
+  
+        @InjectRepository(UserRepository)
+        private readonly userRepository: UserRepository,
 
         @InjectRepository(CommentLikeDislikeRepository)
         private readonly commentLikeDislikeRepository: CommentLikeDislikeRepository
     ) {}
-
+  
     async getCommentsByReview(reviewId: number){
 
         const review = await this.reviewRepository.findById(reviewId);
@@ -35,6 +38,38 @@ export class CommentService {
         
         if (!comments) {
             CommentNotFoundException.byReview(reviewId);
+        }
+
+        let commentsDto: CommentWithLikeDislikeDto[] = [];
+
+        for (const comment of comments){
+
+            let commentDto = new CommentWithLikeDislikeDto();
+            commentDto.id = comment.id;
+            commentDto.user = comment.user;
+            commentDto.review = comment.review;
+            commentDto.content = comment.content;
+            commentDto.likeCount = await this.commentLikeDislikeRepository.getLikeCount(comment.id);
+            commentDto.dislikeCount = await this.commentLikeDislikeRepository.getDislikeCount(comment.id);
+
+            commentsDto.push(commentDto);
+        }
+        
+        return commentsDto;
+
+    }
+
+    async getCommentsByUser(userUId: string){
+
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+
+        let comments = await this.commentRepository.findByUser(user.id);
+        
+        if (!comments) {
+            CommentNotFoundException.byUser(user.id);
         }
 
         let commentsDto: CommentWithLikeDislikeDto[] = [];

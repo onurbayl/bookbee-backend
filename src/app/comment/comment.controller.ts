@@ -12,4 +12,12 @@ export class CommentController {
         return result;
     }
 
+    @Get('get-comments-by-user/')
+    @UseGuards(AuthGuard)
+    async GetCommentsByUser(@Request() req){
+        const uId = req.user.uid;
+        const result = this.commentService.getCommentsByUser(uId);
+        return result;
+    }
+
 }
