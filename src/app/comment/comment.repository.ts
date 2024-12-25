@@ -8,6 +8,12 @@ export class CommentRepository extends Repository<Comment> {
         super(Comment, dataSource.createEntityManager());
     }
     
-    //Add custom repositories
+    async findById(commentId: number): Promise<Comment | undefined> {
+        return this.createQueryBuilder('comment')
+        .leftJoin('comment.user', 'user')
+        .leftJoin('comment.review', 'review')
+        .where('comment.id = :i_comment', {i_comment: commentId})
+        .getOne();
+    }
 
 }
