@@ -8,6 +8,12 @@ export class ReviewRepository extends Repository<Review> {
         super(Review, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async findByBook(bookId: number): Promise<Review[]> {
+        return this.createQueryBuilder('review')
+        .leftJoin('review.user', 'user')
+        .leftJoin('review.book', 'book')
+        .where('book.id = :i_book', {i_book: bookId})
+        .getMany();
+    }
 
 }
