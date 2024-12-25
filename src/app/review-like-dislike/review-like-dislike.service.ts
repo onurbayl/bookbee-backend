@@ -5,6 +5,7 @@ import { UserRepository } from "../user/user.repository";
 import { ReviewRepository } from "../review/review.repository";
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { ReviewNotFoundException } from "../review/exceptions/review-not-found.exception";
+import { ReviewLikeDislike } from "./review-like-dislike.entity";
 
 @Injectable()
 export class ReviewLikeDislikeService {
