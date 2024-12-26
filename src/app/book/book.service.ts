@@ -9,6 +9,7 @@ import { createNewBookDto } from "./dtos/create-new-book-dto";
 import { GenreRepository } from '../genre/genre.repository';
 import { Genre } from "../genre/genre.entity";
 import { UpdateResult } from 'typeorm';
+import { InvalidBookInputException } from "./exceptions/invalid-book-input.exception"
 
 @Injectable()
 export class BookService {
@@ -55,8 +56,31 @@ export class BookService {
       genreEntities.push(genre);
     }
 
-    const newBook = await this.bookRepository.uploadBook(createBookDto, user, genreEntities);
-    return newBook;
+    const { name, description, price, writer, pageNumber, datePublished,
+        language, bookDimension, barcode, isbn, editionNumber, imagePath, genres
+    } = createBookDto;
+    
+    if ( price < 0 ){ throw new InvalidBookInputException.Price(); }
+    if ( pageNumber < 0 ){throw new InvalidBookInputException.PageNumber();}
+    
+    const book = new Book();
+    book.name = name;
+    book.description = description;
+    book.price = price;
+    book.publisher = user;
+    book.writer = writer;
+    book.pageNumber = pageNumber;
+    book.datePublished = datePublished;
+    book.language = language;
+    book.bookDimension = bookDimension;
+    book.barcode = barcode;
+    book.isbn = isbn;
+    book.editionNumber = editionNumber;
+    book.imagePath = imagePath;
+    book.isDeleted = false;
+    book.genres = genreEntities;
+
+    return await this.bookRepository.save(book);
 
   }
 

@@ -3,6 +3,7 @@ import { BookService } from './book.service';
 import { Book } from './book.entity';
 import { AuthGuard } from "src/guards/auth.guard";
 import { createNewBookDto } from "./dtos/create-new-book-dto";
+import { RestrictedBookOpException } from "./exceptions/restricted-book-op.exception"
 
 @Controller('api/v1/book')
 export class BookController {
@@ -25,7 +26,7 @@ export class BookController {
   async uploadBook( @Body() createBookDto: createNewBookDto, @Request() req ){
     const uId = req.user.uid;
     if ( req.user.role != 'publisher' && req.user.role != 'admin') {
-      throw new ForbiddenException('You are not authorized to upload a book.');
+      throw new RestrictedBookOpException.Upload();
     }
     const result = await this.bookService.uploadBook(createBookDto, uId);
     return result;
@@ -36,7 +37,7 @@ export class BookController {
   async deleteBook(@Param('bookId') bookId: number, @Request() req ){
     const uId = req.user.uid;
     if ( req.user.role != 'publisher' && req.user.role != 'admin') {
-      throw new ForbiddenException('You are not authorized to delete a book.');
+      throw new RestrictedBookOpException.Delete();
     }
 
     const result = await this.bookService.deleteBook(bookId, uId);

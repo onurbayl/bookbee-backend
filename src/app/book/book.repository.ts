@@ -36,41 +36,4 @@ export class BookRepository extends Repository<Book> {
         .leftJoinAndSelect('book.genres', 'genres').getMany();
     }
 
-    async uploadBook(createBookDto: createNewBookDto , user: User, genreEntities: Genre[]): Promise<Book> {
-        
-        const { name, description, price, writer, pageNumber, datePublished,
-            language, bookDimension, barcode, isbn, editionNumber, imagePath, genres
-         } = createBookDto;
-        
-        if ( price < 0 ){ throw new BadRequestException({
-            statusCode: 400,
-            message: ['Price cannot be lower than 0'],
-            error: 'Validation Error',
-          }); }
-        if ( pageNumber < 0 ){throw new BadRequestException({
-            statusCode: 400,
-            message: ['Page Number cannot be lower than 0'],
-            error: 'Validation Error',
-          });}
-        
-        const book = new Book();
-        book.name = name;
-        book.description = description;
-        book.price = price;
-        book.publisher = user;
-        book.writer = writer;
-        book.pageNumber = pageNumber;
-        book.datePublished = datePublished;
-        book.language = language;
-        book.bookDimension = bookDimension;
-        book.barcode = barcode;
-        book.isbn = isbn;
-        book.editionNumber = editionNumber;
-        book.imagePath = imagePath;
-        book.isDeleted = false;
-        book.genres = genreEntities;
-
-        return await this.save(book);
-    }
-
 }

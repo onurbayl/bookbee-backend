@@ -7,8 +7,7 @@ export class GenreController {
 
     @Get('get-all-genres')
     async fetchAllGenres() {
-        const book = await this.genreService.fetchAllGenres();
-        return book;
+        return await this.genreService.fetchAllGenres();
     }
     
 }

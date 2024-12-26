@@ -7,6 +7,7 @@ import { BookNotFoundException } from '../book/exceptions/book-not-found.excepti
 import { UserNotFoundException } from "../user/exceptions/user-not-found.exception";
 import { UserRepository } from 'src/app/user/user.repository';
 import { ReadStatus } from "./read-status.entity";
+import { InvalidStatusException } from "./exceptions/invalid-status.exception";
 
 @Injectable()
 export class ReadStatusService {
@@ -19,17 +20,43 @@ export class ReadStatusService {
         private readonly userRepository: UserRepository,
     ) {}
 
-    async getReadStatus(bookId: number, uId: string): Promise<ReadStatus> {
+    async getReadStatus(userId: number): Promise<ReadStatus[]> {
+
+        const targetUser = await this.userRepository.findById(userId);
+        if( targetUser == null ){
+            UserNotFoundException.byId(userId);
+        }
     
-        return await this.readStatusRepository.getReadStatus(bookId, uId);
+        return await this.readStatusRepository.getReadStatusForUser(userId);
     
     }
 
     async setReadStatus(
         bookId: number,
         uId: string,
-        status: string,
+        status_number: number,
     ): Promise<ReadStatus> {
+
+        if (status_number !== 0 && status_number !== 1 && status_number !== 2){
+            throw new InvalidStatusException.Invalid();
+        }
+
+        let status: string;
+
+        if (status_number === 0){
+            status = "Already Read";
+        }
+        else if (status_number === 1){
+            status = "Reading"
+        }
+        else if (status_number === 2){
+            status = "Will Read"
+        }
+
+        else {
+            throw new InvalidStatusException.Invalid();
+        }
+
         // Find the existing ReadStatus if it exists
         // getReadStatus already checks if the book whose status is gonna change is belong to user
         // If the book is not belong to user, then "else" works and new ReadStatus created and saved.
@@ -47,11 +74,11 @@ export class ReadStatusService {
             const book = await this.bookRepository.findOneBy({ id: bookId });
     
             if (!user) {
-                throw new Error('User not found');
+                throw new UserNotFoundException.byUId();
             }
 
             if (!book) {
-                throw new Error('Book not found');
+                throw new BookNotFoundException.byId(bookId);
             }
 
             let readDate = new Date();

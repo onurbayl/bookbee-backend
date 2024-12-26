@@ -6,27 +6,21 @@ import { AuthGuard } from "src/guards/auth.guard";
 export class ReadStatusController {
     constructor(private readonly readStatusService : ReadStatusService) {}
 
-    @Get('get-readStatus/:bookId')
-    @UseGuards(AuthGuard)
-    async getReadStatus( @Param('bookId') bookId: number, @Request() req ){
-        const uId = req.user.uid;
+    @Get('get-readStatus/:userId')
+    async getReadStatus( @Param('userId') userId: number){
 
-        const result = await this.readStatusService.getReadStatus(bookId, uId);
-        return result;
+        return await this.readStatusService.getReadStatus(userId);
+
     }
 
-    @Post('set-readStatus/:bookId/:status')
+    @Post('set-readStatus/:bookId/status/:status_number')
     @UseGuards(AuthGuard)
-    async setReadStatus( @Param('bookId') bookId: number, @Param('status') status: string, @Request() req ){
+    async setReadStatus( @Param('bookId') bookId: number, @Param('status_number') status_number: number, @Request() req ){
         
         const uId = req.user.uid;
 
-        if (status !== "Will Read" && status !== "Already Read" && status !== "Reading"){
-            throw new ForbiddenException("Not valid status!");
-        }
+        return await this.readStatusService.setReadStatus(bookId, uId, status_number);
 
-        const result = await this.readStatusService.setReadStatus(bookId, uId, status);
-        return result;
     }
 
 }

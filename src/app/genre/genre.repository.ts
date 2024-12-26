@@ -15,8 +15,8 @@ export class GenreRepository extends Repository<Genre> {
     }
 
     async findAll(): Promise<Genre[] | undefined> {
-            return await this.createQueryBuilder('genre')
-            .getMany();
+        return await this.createQueryBuilder('genre')
+        .getMany();
     }
 
 }
