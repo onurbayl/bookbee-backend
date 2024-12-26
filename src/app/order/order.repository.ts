@@ -17,4 +17,13 @@ export class OrderRepository extends Repository<Order> {
         .getMany();
     }
 
+    async findById(orderId: number): Promise<Order | undefined>{
+        return this.createQueryBuilder('order')
+        .leftJoinAndSelect('order.user', 'user')
+        .leftJoinAndSelect('order.usedCoupon', 'coupon')
+        .leftJoinAndSelect('order.address', 'address')
+        .where('order.id = :order_id', {order_id: orderId})
+        .getOne();
+    }
+
 }

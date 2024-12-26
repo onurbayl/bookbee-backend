@@ -22,6 +22,9 @@ import { UserBadRequestException } from "../user/exceptions/user-bad-request.exc
 import { OrderBadRequestException } from "./exceptions/order-bad-request.exception";
 import { User } from "../user/user.entity";
 import { CartItem } from "../cart-item/cart-item.entity";
+import { OrderNotFoundException } from "./exceptions/order-not-found.exception";
+import { orderItemDetailsDTO } from "../order-item/dtos/order-item-details-dto";
+import { orderDetailsDTO } from "./dtos/order-details-dto";
 
 @Injectable()
 export class OrderService {
@@ -185,6 +188,60 @@ export class OrderService {
         const historyList = await this.orderRepository.findByUser(user.id);
 
         return historyList;
+    }
+
+    async getOrderHistoryDetails(orderId: number, uId: string){
+        const user = await this.userRepository.findByUId(uId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+
+        const order = await this.orderRepository.findById(orderId);
+        if(order == null){
+            OrderNotFoundException.byId(orderId);
+        }
+
+        if( order.user.id != user.id ){
+            OrderBadRequestException.ByWrongUser();
+        }
+
+        const orderItems = await this.orderItemRepository.findByOrder(orderId);
+        const resultItems: orderItemDetailsDTO[] = [];
+        let totalPrice = 0;
+        
+        for( const item of orderItems ){
+            const newItem = new orderItemDetailsDTO();
+            newItem.id = item.id;
+            newItem.book = item.book;
+            newItem.unitPrice = item.unitPrice;
+            newItem.discountPercentage = 0;
+            if( item.discount != null ){
+                newItem.discountPercentage = item.discount.discountPercentage;
+            }
+            newItem.discountedPrice = parseFloat( ( newItem.unitPrice*(100-newItem.discountPercentage)/100 ).toFixed(2) );
+            newItem.quantity = item.quantity;
+            newItem.totalPrice = parseFloat( (newItem.discountedPrice*newItem.quantity).toFixed(2) );
+
+            resultItems.push(newItem);
+            totalPrice += newItem.totalPrice;
+        }
+
+        totalPrice = parseFloat( totalPrice.toFixed(2) );
+
+        const resultOrder = new orderDetailsDTO();
+        resultOrder.id = order.id;
+        resultOrder.addressInfo = order.address.addressInfo;
+        resultOrder.user = order.user;
+        resultOrder.orderDate = order.orderDate;
+        resultOrder.subtotal = totalPrice;
+        resultOrder.totalPrice = order.totalPrice;
+        resultOrder.couponDiscountPercentage = 0;
+        if( order.usedCoupon != null ){
+            resultOrder.couponDiscountPercentage = order.usedCoupon.discountPercentage;
+        }
+        resultOrder.orderItems = resultItems;
+
+        return resultOrder;
     }
 
 }

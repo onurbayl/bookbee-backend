@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
 import { OrderService } from "./order.service";
 import { AuthGuard } from "src/guards/auth.guard";
 import { createNewOrderDto } from "./dtos/create-new-order-dto";
@@ -20,6 +20,14 @@ export class OrderController {
     async getOrderHistory( @Request() req ) {
         const uId = req.user.uid;
         const result = this.orderService.getOrderHistory(uId);
+        return result;
+    }
+
+    @Get('get-history/:orderId')
+    @UseGuards(AuthGuard)
+    async getOrderHistoryDetails( @Param('orderId') orderId: number, @Request() req ) {
+        const uId = req.user.uid;
+        const result = this.orderService.getOrderHistoryDetails(orderId, uId);
         return result;
     }
 

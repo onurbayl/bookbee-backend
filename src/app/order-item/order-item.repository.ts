@@ -8,6 +8,13 @@ export class OrderItemRepository extends Repository<OrderItem> {
         super(OrderItem, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async findByOrder(orderId: number): Promise<OrderItem[]>{
+        return this.createQueryBuilder('orderItem')
+        .leftJoin('orderItem.order', 'order')
+        .leftJoinAndSelect('orderItem.book', 'book')
+        .leftJoinAndSelect('orderItem.discount', 'discount')
+        .where('order.id = :order_id', {order_id: orderId})
+        .getMany();
+    }
 
 }
