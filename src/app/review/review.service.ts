@@ -27,7 +27,10 @@ export class ReviewService {
         private readonly reviewLikeDislikeRepository: ReviewLikeDislikeRepository
     ) {}
 
-    async getLastTenReviews(userId: number){
+    async getLastTenReviews(userId: number, uId: string){
+
+        const reqUser = await this.userRepository.findByUId(uId);
+
         const user = await this.userRepository.findById(userId);
         if(user == null){
             UserNotFoundException.byId(userId);
@@ -51,6 +54,14 @@ export class ReviewService {
             reviewDto.content = review.content;
             reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
             reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+            reviewDto.userChoice = 0;
+            if(reqUser != null){
+                const userLike = await this.reviewLikeDislikeRepository.findByReviewAndUser(review.id, reqUser.id);
+                if( userLike != null ){
+                    reviewDto.userChoice = userLike.likeDislike;
+                }
+            }
+            reviewDto.dateCreated = review.dateCreated;
 
             reviewsDto.push(reviewDto);
         }
@@ -120,7 +131,9 @@ export class ReviewService {
         return await this.reviewRepository.save(review);
     }
 
-    async getReviewsByBook(bookId: number){
+    async getReviewsByBook(bookId: number, uId: string){
+
+        const reqUser = await this.userRepository.findByUId(uId);
 
         const book = await this.bookRepository.findById(bookId);
         if(book == null){
@@ -145,6 +158,14 @@ export class ReviewService {
             reviewDto.content = review.content;
             reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
             reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+            reviewDto.userChoice = 0;
+            if(reqUser != null){
+                const userLike = await this.reviewLikeDislikeRepository.findByReviewAndUser(review.id, reqUser.id);
+                if( userLike != null ){
+                    reviewDto.userChoice = userLike.likeDislike;
+                }
+            }
+            reviewDto.dateCreated = review.dateCreated;
 
             reviewsDto.push(reviewDto);
         }
@@ -177,6 +198,12 @@ export class ReviewService {
             reviewDto.content = review.content;
             reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
             reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+            reviewDto.userChoice = 0;
+            const userLike = await this.reviewLikeDislikeRepository.findByReviewAndUser(review.id, user.id);
+            if( userLike != null ){
+                reviewDto.userChoice = userLike.likeDislike;
+            }
+            reviewDto.dateCreated = review.dateCreated;
 
             reviewsDto.push(reviewDto);
         }
@@ -210,6 +237,12 @@ export class ReviewService {
         reviewDto.content = review.content;
         reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
         reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+        reviewDto.userChoice = 0;
+        const userLike = await this.reviewLikeDislikeRepository.findByReviewAndUser(review.id, user.id);
+        if( userLike != null ){
+            reviewDto.userChoice = await userLike.likeDislike;
+        }
+        reviewDto.dateCreated = review.dateCreated;
         
         return reviewDto;
     }

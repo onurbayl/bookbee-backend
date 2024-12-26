@@ -10,6 +10,7 @@ export class ReviewWithLikeDislikeDto{
     content: string;
     likeCount: number;
     dislikeCount: number;
+    userChoice: number;
     dateCreated: Date;
 
 }

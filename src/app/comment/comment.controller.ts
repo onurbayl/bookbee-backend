@@ -1,15 +1,18 @@
-import { Body, Controller, Param, UseGuards, Request, Get, Post, Delete } from "@nestjs/common";
+import { Body, Controller, Param, UseGuards, Request, Get, Post, Delete, UseInterceptors } from "@nestjs/common";
 import { CommentService } from "./comment.service";
 import { AuthGuard } from "src/guards/auth.guard";
 import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
+import { FirebaseAuthInterceptor } from "src/interceptors/firebase-auth.interceptor";
 
 @Controller('api/v1/comment')
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
   
     @Get('get-last-ten-comments/:userId')
-    async GetLastTenComments(@Param('userId') userId: number){
-        const result = this.commentService.getLastTenComments(userId);
+    @UseInterceptors(FirebaseAuthInterceptor)
+    async GetLastTenComments(@Param('userId') userId: number, @Request() req){
+        const uId = req.firebaseUid;
+        const result = this.commentService.getLastTenComments(userId, uId);
         return result;
     }
 
@@ -32,8 +35,10 @@ export class CommentController {
     }
 
     @Get('get-comments-by-review/:reviewId')
-    async GetCommentsByReview(@Param('reviewId') reviewId: number){
-        const result = this.commentService.getCommentsByReview(reviewId);
+    @UseInterceptors(FirebaseAuthInterceptor)
+    async GetCommentsByReview(@Param('reviewId') reviewId: number, @Request() req){
+        const uId = req.firebaseUid;
+        const result = this.commentService.getCommentsByReview(reviewId, uId);
         return result;
     }
 

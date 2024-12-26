@@ -27,7 +27,9 @@ export class CommentService {
         private readonly commentLikeDislikeRepository: CommentLikeDislikeRepository
     ) {}
   
-    async getCommentsByReview(reviewId: number){
+    async getCommentsByReview(reviewId: number, uId: string){
+        
+        const reqUser = await this.userRepository.findByUId(uId);
 
         const review = await this.reviewRepository.findById(reviewId);
         if(review == null){
@@ -51,6 +53,14 @@ export class CommentService {
             commentDto.content = comment.content;
             commentDto.likeCount = await this.commentLikeDislikeRepository.getLikeCount(comment.id);
             commentDto.dislikeCount = await this.commentLikeDislikeRepository.getDislikeCount(comment.id);
+            commentDto.userChoice = 0;
+            if(reqUser != null){
+                const userLike = await this.commentLikeDislikeRepository.findByReviewAndUser(comment.id, reqUser.id);
+                if( userLike != null ){
+                    commentDto.userChoice = userLike.likeDislike;
+                }
+            }
+            commentDto.dateCreated = comment.dateCreated;
 
             commentsDto.push(commentDto);
         }
@@ -83,6 +93,12 @@ export class CommentService {
             commentDto.content = comment.content;
             commentDto.likeCount = await this.commentLikeDislikeRepository.getLikeCount(comment.id);
             commentDto.dislikeCount = await this.commentLikeDislikeRepository.getDislikeCount(comment.id);
+            commentDto.userChoice = 0;
+            const userLike = await this.commentLikeDislikeRepository.findByReviewAndUser(comment.id, user.id);
+            if( userLike != null ){
+                commentDto.userChoice = userLike.likeDislike;
+            }
+            commentDto.dateCreated = comment.dateCreated;
 
             commentsDto.push(commentDto);
         }
@@ -90,7 +106,9 @@ export class CommentService {
         return commentsDto;
     }
 
-    async getLastTenComments(userId: number){
+    async getLastTenComments(userId: number, uId: string){
+
+        const reqUser = await this.userRepository.findByUId(uId);
 
         const user = await this.userRepository.findById(userId);
         if(user == null){
@@ -114,6 +132,14 @@ export class CommentService {
             commentDto.content = comment.content;
             commentDto.likeCount = await this.commentLikeDislikeRepository.getLikeCount(comment.id);
             commentDto.dislikeCount = await this.commentLikeDislikeRepository.getDislikeCount(comment.id);
+            commentDto.userChoice = 0;
+            if(reqUser != null){
+                const userLike = await this.commentLikeDislikeRepository.findByReviewAndUser(comment.id, reqUser.id);
+                if( userLike != null ){
+                    commentDto.userChoice = userLike.likeDislike;
+                }
+            }
+            commentDto.dateCreated = comment.dateCreated;
 
             commentsDto.push(commentDto);
         }
