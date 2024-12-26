@@ -10,6 +10,7 @@ import { GenreRepository } from '../genre/genre.repository';
 import { Genre } from "../genre/genre.entity";
 import { UpdateResult } from 'typeorm';
 import { InvalidBookInputException } from "./exceptions/invalid-book-input.exception"
+import { InvalidGenreException } from '../genre/exceptions/invalid-genre.exception';
 
 @Injectable()
 export class BookService {
@@ -61,7 +62,7 @@ export class BookService {
     for (const genreId of createBookDto.genres) {
       const genre = await this.genreRepository.findGenre(genreId);
       if (!genre) {
-        throw new Error(`Genre with ID ${genreId} not found.`);
+        InvalidGenreException.Invalid(genreId);
       }
       genreEntities.push(genre);
     }
