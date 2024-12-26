@@ -14,7 +14,7 @@ export class CommentLikeDislike {
 
     @ManyToOne(() => Comment, { onDelete: 'CASCADE' })
     @JoinColumn([{ name: 'comment_id', referencedColumnName: 'id' }])
-    review: Comment;
+    comment: Comment;
 
     @Column({ type: 'integer' })
     likeDislike: number;

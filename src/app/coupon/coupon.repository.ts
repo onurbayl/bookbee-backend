@@ -21,6 +21,7 @@ export class CouponRepository extends Repository<Coupon> {
     async findActiveById(couponId: number): Promise<Coupon | undefined>{
         return this.createQueryBuilder('coupon')
         .where('coupon.id = :coupon_id', {coupon_id: couponId})
+        .leftJoinAndSelect('coupon.user', 'user')
         .andWhere('coupon.startDate <= CURRENT_TIMESTAMP')
         .andWhere('coupon.endDate >= CURRENT_TIMESTAMP')
         .andWhere('NOT coupon.used')

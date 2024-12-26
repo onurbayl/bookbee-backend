@@ -58,12 +58,6 @@ export class OrderService {
         try {
             return this.dataSource.transaction( async (manager) =>  {
 
-                const orderRepository = manager.getRepository(Order);
-                const userRepository = manager.getRepository(User);
-                const cartItemRepository = manager.getRepository(CartItem);
-                const couponRepository = manager.getRepository(Coupon);
-                const orderItemRepository = manager.getRepository(OrderItem);
-
                 let user = await this.userRepository.findByUId(uId);
                 if(user == null){
                     UserNotFoundException.byUId();
@@ -85,11 +79,16 @@ export class OrderService {
         
                 if( inputData.couponId != null ){
                     selectedCoupon = await this.couponRepository.findActiveById(inputData.couponId);
-                    couponPercentage = (100 - selectedCoupon.discountPercentage) / 100;
         
                     if( selectedCoupon == null ){
                         CouponInvalidDataException.byInvalidCoupon(selectedCoupon.id);
                     }
+
+                    if( selectedCoupon.user.id != user.id  ){
+                        CouponInvalidDataException.byWrongUser();
+                    }
+
+                    couponPercentage = (100 - selectedCoupon.discountPercentage) / 100;
                 } 
         
                 let newOrder = new Order();
@@ -136,18 +135,18 @@ export class OrderService {
 
                     const updatedUserBalance = user.balance - itemCost;
                     user.balance = parseFloat(updatedUserBalance.toFixed(2));
-                    user = await userRepository.save(user);
+                    user = await manager.save(User, user);
 
                     const publisher = await this.userRepository.findById(newOrderItem.book.publisher.id);
                     const updatedPublisherBalance = Number(publisher.balance) + itemCost;
                     publisher.balance = parseFloat( updatedPublisherBalance.toFixed(2) );
-                    await userRepository.save(publisher);
+                    await manager.save(User, publisher);
         
                     //Update totalPrice in newOrder
                     newOrder.totalPrice += itemCost;
         
                     //delete cartItem
-                    await cartItemRepository.delete(item);
+                    await manager.remove(CartItem, item);
         
                     //put orderItem into list
                     newOrderItemList.push(newOrderItem);
@@ -156,17 +155,17 @@ export class OrderService {
                 //update used coupon
                 if( selectedCoupon != null ){
                     selectedCoupon.used = true;
-                    await couponRepository.save(selectedCoupon);
+                    await manager.save(Coupon, selectedCoupon);
                 }
         
                 //save order
                 newOrder.totalPrice = parseFloat(newOrder.totalPrice.toFixed(2));
-                newOrder = await orderRepository.save(newOrder);
+                newOrder = await manager.save(Order, newOrder);
 
                 //assign order to order items and save them
                 for( const item of newOrderItemList ){
                     item.order = newOrder;
-                    await orderItemRepository.save(item);
+                    await manager.save(OrderItem, item);
                 }
 
                 return newOrder;
