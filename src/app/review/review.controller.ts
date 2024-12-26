@@ -1,7 +1,8 @@
-import { Body, Controller, Param, UseGuards, Request, Get, Post, Delete } from "@nestjs/common";
+import { Body, Controller, Param, UseGuards, Request, Get, Post, Delete, UseInterceptors } from "@nestjs/common";
 import { ReviewService } from "./review.service";
 import { AuthGuard } from "src/guards/auth.guard";
 import { ReviewWithLikeDislikeDto } from "./dtos/review-with-like-dislike-dto";
+import { FirebaseAuthInterceptor } from "src/interceptors/firebase-auth.interceptor";
 
 @Controller('api/v1/review')
 export class ReviewController {
@@ -17,8 +18,10 @@ export class ReviewController {
     }
   
     @Get('get-last-ten-reviews/:userId')
-    async GetLastTenComments(@Param('userId') userId: number){
-        const result = this.reviewService.getLastTenReviews(userId);
+    @UseInterceptors(FirebaseAuthInterceptor)
+    async GetLastTenComments(@Param('userId') userId: number, @Request() req){
+        const uId = req.firebaseUid;
+        const result = this.reviewService.getLastTenReviews(userId, uId);
         return result;
     }
   
@@ -34,8 +37,10 @@ export class ReviewController {
     }
 
     @Get('get-reviews-book/:bookId')
-    async getReviewsByBook(@Param('bookId') bookId: number){
-        const result = this.reviewService.getReviewsByBook(bookId);
+    @UseInterceptors(FirebaseAuthInterceptor)
+    async getReviewsByBook(@Param('bookId') bookId: number,  @Request() req){
+        const uId = req.firebaseUid;
+        const result = this.reviewService.getReviewsByBook(bookId, uId);
         return result;
     }
   
