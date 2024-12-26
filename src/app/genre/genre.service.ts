@@ -4,11 +4,13 @@ import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class GenreService {
-    constructor( //Injects repositories that you want to use
+    constructor(
         @InjectRepository(GenreRepository)
         private readonly genreRepository: GenreRepository,
     ) {}
 
-    //Add service methods
+    async fetchAllGenres() {
+        return await this.genreRepository.findAll();
+    }
 
 }
