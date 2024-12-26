@@ -15,6 +15,12 @@ export class BookController {
     return book;
   }
 
+  @Get('get-book/:bookId')
+  async findBookById(@Param('bookId') bookId: number) {
+    const book = await this.bookService.findBookById(bookId);
+    return book;
+  }
+
   @Get('get-all-books')
   async fetchAllBooks() {
     const book = await this.bookService.getAllBooks();

@@ -35,6 +35,16 @@ export class BookService {
 
   }
 
+  async findBookById(bookId: number): Promise<Book> {
+
+    const rBook2 = await this.bookRepository.findById(bookId);
+    if (rBook2 == null) { 
+      BookNotFoundException.byId(bookId);
+    }
+    return rBook2;
+
+  }
+
   async getAllBooks(): Promise<Book[] | undefined> {
     return await this.bookRepository.findAll();
   }
