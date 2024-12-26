@@ -26,7 +26,7 @@ export class BookController {
   async uploadBook( @Body() createBookDto: createNewBookDto, @Request() req ){
     const uId = req.user.uid;
     if ( req.user.role != 'publisher' && req.user.role != 'admin') {
-      throw new RestrictedBookOpException.Upload();
+      RestrictedBookOpException.Upload();
     }
     const result = await this.bookService.uploadBook(createBookDto, uId);
     return result;
@@ -37,7 +37,7 @@ export class BookController {
   async deleteBook(@Param('bookId') bookId: number, @Request() req ){
     const uId = req.user.uid;
     if ( req.user.role != 'publisher' && req.user.role != 'admin') {
-      throw new RestrictedBookOpException.Delete();
+      RestrictedBookOpException.Delete();
     }
 
     const result = await this.bookService.deleteBook(bookId, uId);

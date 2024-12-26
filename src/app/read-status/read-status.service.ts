@@ -38,7 +38,7 @@ export class ReadStatusService {
     ): Promise<ReadStatus> {
 
         if (status_number !== 0 && status_number !== 1 && status_number !== 2){
-            throw new InvalidStatusException.Invalid();
+            InvalidStatusException.Invalid();
         }
 
         let status: string;
@@ -54,7 +54,7 @@ export class ReadStatusService {
         }
 
         else {
-            throw new InvalidStatusException.Invalid();
+            InvalidStatusException.Invalid();
         }
 
         // Find the existing ReadStatus if it exists
@@ -74,11 +74,11 @@ export class ReadStatusService {
             const book = await this.bookRepository.findOneBy({ id: bookId });
     
             if (!user) {
-                throw new UserNotFoundException.byUId();
+                UserNotFoundException.byUId();
             }
 
             if (!book) {
-                throw new BookNotFoundException.byId(bookId);
+                BookNotFoundException.byId(bookId);
             }
 
             let readDate = new Date();

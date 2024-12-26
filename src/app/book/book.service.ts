@@ -60,8 +60,8 @@ export class BookService {
         language, bookDimension, barcode, isbn, editionNumber, imagePath, genres
     } = createBookDto;
     
-    if ( price < 0 ){ throw new InvalidBookInputException.Price(); }
-    if ( pageNumber < 0 ){throw new InvalidBookInputException.PageNumber();}
+    if ( price < 0 ){ InvalidBookInputException.Price(); }
+    if ( pageNumber < 0 ){ InvalidBookInputException.PageNumber(); }
     
     const book = new Book();
     book.name = name;
