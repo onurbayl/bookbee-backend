@@ -10,15 +10,15 @@ export class CommentNotFoundException extends HttpException {
   }
 
   static byReview( reviewId: number ) {
-    throw new CommentNotFoundException(`Comment for review ${reviewId} not found`, HttpStatus.NOT_FOUND)
+    throw new CommentNotFoundException(`Comments for review ${reviewId} not found`, HttpStatus.NOT_FOUND)
   }
 
   static byUser( userId: number ) {
-    throw new CommentNotFoundException(`Comment for user ${userId} not found`, HttpStatus.NOT_FOUND)
+    throw new CommentNotFoundException(`Comments by user ${userId} not found`, HttpStatus.NOT_FOUND)
   }
 
   static byReviewAndUser( reviewId: number, userId: number ) {
-    throw new CommentNotFoundException(`Comment for review ID ${reviewId} and user ID ${userId} not found`, HttpStatus.NOT_FOUND)
+    throw new CommentNotFoundException(`Comments for review ID ${reviewId} and user ID ${userId} not found`, HttpStatus.NOT_FOUND)
   }
 
   static byId( commentId: number ) {
