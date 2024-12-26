@@ -81,7 +81,7 @@ export class OrderService {
                     selectedCoupon = await this.couponRepository.findActiveById(inputData.couponId);
         
                     if( selectedCoupon == null ){
-                        CouponInvalidDataException.byInvalidCoupon(selectedCoupon.id);
+                        CouponInvalidDataException.byInvalidCoupon(inputData.couponId);
                     }
 
                     if( selectedCoupon.user.id != user.id  ){
