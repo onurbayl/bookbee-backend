@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Delete, Request,Param, NotFoundException, ForbiddenException,InternalServerErrorException, Next, Query, Body, ValidationPipe, UsePipes, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Request,Param, NotFoundException, ForbiddenException,InternalServerErrorException, Next, Query, Body, ValidationPipe, UsePipes, UseGuards, BadRequestException, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';  // Import the service
 import { User } from './user.entity';  // Import the User entity
 import { RegisterUserDto } from './dtos/register-user.dto';
@@ -8,6 +8,7 @@ import { AdminGuard } from 'src/guards/admin.guard';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserUnauthorizedException } from './exceptions/user-unauthorized.exception';
+import { FirebaseAuthInterceptor } from 'src/interceptors/firebase-auth.interceptor';
 
 @Controller('api/v1/user')
 export class UserController {
@@ -21,6 +22,15 @@ export class UserController {
       UserUnauthorizedException.byNotAdmin()
     }
     return await this.userService.getAllUsers();
+  }
+
+  // Example case for interceptor use
+  @Get('test')
+  @UseInterceptors(FirebaseAuthInterceptor)
+  getUserProfile(@Request() req: any) {
+    return {
+      firebaseUid: req.firebaseUid
+    };
   }
 
   @Get('bytoken')
