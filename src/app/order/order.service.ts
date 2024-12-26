@@ -176,4 +176,15 @@ export class OrderService {
         }
     }
 
+    async getOrderHistory(uId: string){
+        const user = await this.userRepository.findByUId(uId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+
+        const historyList = await this.orderRepository.findByUser(user.id);
+
+        return historyList;
+    }
+
 }
