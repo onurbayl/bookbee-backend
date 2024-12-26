@@ -21,4 +21,8 @@ export class UserBadRequestException extends HttpException {
     throw new UserBadRequestException(`The user with email ${email} already exists`, HttpStatus.BAD_REQUEST)
   }
 
+  static byNotEnoughBalance(id: number) {
+    throw new UserBadRequestException(`The user with Id ${id} does not have enough balance to complete this transaction.`, HttpStatus.BAD_REQUEST)
+  }
+
 }

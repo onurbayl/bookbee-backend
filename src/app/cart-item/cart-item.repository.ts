@@ -27,4 +27,14 @@ export class CartItemRepository extends Repository<CartItem> {
         .getMany();
     }
 
+    async findByCartWithPublisher( cartId: number ): Promise<CartItem[]> {
+        return this.createQueryBuilder('cartItem')
+        .leftJoinAndSelect('cartItem.cart', 'cart')
+        .leftJoinAndSelect('cart.user', 'user')
+        .leftJoinAndSelect('cartItem.book', 'book')
+        .leftJoinAndSelect('book.publisher', 'publisher')
+        .where( 'cart.id = :i_cart', {i_cart: cartId} )
+        .getMany();
+    }
+
 }
