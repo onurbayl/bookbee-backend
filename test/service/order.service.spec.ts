@@ -24,6 +24,8 @@ import { CouponInvalidDataException } from 'src/app/coupon/exceptions/coupon-inv
 import { OrderBadRequestException } from 'src/app/order/exceptions/order-bad-request.exception';
 import { UserBadRequestException } from 'src/app/user/exceptions/user-bad-request.exception';
 import { Order } from 'src/app/order/order.entity';
+import { OrderItem } from 'src/app/order-item/order-item.entity';
+import { OrderNotFoundException } from 'src/app/order/exceptions/order-not-found.exception';
 
 
 describe('WishListService', () => {
@@ -44,6 +46,7 @@ describe('WishListService', () => {
 
     orderRepository = {
         findByUser: jest.fn(),
+        findById: jest.fn(),
     };
 
     userRepository = {
@@ -72,6 +75,7 @@ describe('WishListService', () => {
     };
 
     orderItemRepository = {
+        findByOrder: jest.fn(),
     };
 
     mockId = 1;
@@ -503,6 +507,146 @@ describe('WishListService', () => {
         const err = await orderService.getOrderHistory('1').catch(e => e);
         expect(err).toBeInstanceOf(UserNotFoundException);
         expect(err.message).toContain('User with given UID not found');
+    });
+
+  });
+
+  describe('completePurchaseForUser', () => {
+    it('Success', async () => {
+        const mockUser = new User();
+        mockUser.id = 1;
+        mockUser.name = 'Mock User';
+
+        const mockAddress = new CustomerAddress();
+        mockAddress.addressInfo = 'Potato';
+
+        const mockBook = new Book();
+        mockBook.id = 1;
+        mockBook.price = 100;
+
+        const mockDiscount = new Discount();
+        mockDiscount.discountPercentage = 50;
+
+        const mockCoupon = new Coupon();
+        mockCoupon.discountPercentage = 50;
+
+        const mockOrder = new Order();
+        mockOrder.id = 1;
+        mockOrder.user = mockUser;
+        mockOrder.usedCoupon = mockCoupon;
+        mockOrder.totalPrice = 25;
+        mockOrder.orderDate = new Date();
+        mockOrder.address = mockAddress;
+
+        const mockOrderItem = new OrderItem();
+        mockOrderItem.book = mockBook;
+        mockOrderItem.discount = mockDiscount;
+        mockOrderItem.quantity = 1;
+        mockOrderItem.unitPrice = 100;
+        mockOrderItem.order = mockOrder;
+        mockOrderItem.id = 1;
+
+        const mockOrderItemList = [mockOrderItem];
+
+        (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+        (orderRepository.findById as jest.Mock).mockResolvedValue(mockOrder);
+        (orderItemRepository.findByOrder as jest.Mock).mockResolvedValue(mockOrderItemList);
+
+        const result = await orderService.getOrderHistoryDetails(1, '1');
+
+        expect(result.id).toEqual(1);
+        expect(result.addressInfo).toEqual('Potato');
+        expect(result.user).toEqual(mockUser);
+        expect(result.subtotal).toEqual(50);
+        expect(result.totalPrice).toEqual(25);
+        expect(result.couponDiscountPercentage).toEqual(50);
+        expect(result.orderItems.length).toEqual(1);
+        expect(result.orderItems[0].book).toEqual(mockBook);
+        expect(result.orderItems[0].discountPercentage).toEqual(50);
+        expect(result.orderItems[0].discountedPrice).toEqual(50);
+        expect(result.orderItems[0].unitPrice).toEqual(100);
+        expect(result.orderItems[0].totalPrice).toEqual(50);
+    });
+
+    it('Fail_UserNotFoundException_byUId', async () => {
+
+        (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+        
+        const err = await orderService.getOrderHistoryDetails(1, '1').catch(e => e);
+        expect(err).toBeInstanceOf(UserNotFoundException);
+        expect(err.message).toContain('User with given UID not found');
+    });
+
+    it('Fail_OrderNotFoundException_byId', async () => {
+        const mockUser = new User();
+        mockUser.id = 1;
+        mockUser.name = 'Mock User';
+
+        const mockAddress = new CustomerAddress();
+        mockAddress.addressInfo = 'Potato';
+
+        const mockBook = new Book();
+        mockBook.id = 1;
+        mockBook.price = 100;
+
+        const mockDiscount = new Discount();
+        mockDiscount.discountPercentage = 50;
+
+        const mockCoupon = new Coupon();
+        mockCoupon.discountPercentage = 50;
+
+        const mockOrder = new Order();
+        mockOrder.id = 1;
+        mockOrder.user = mockUser;
+        mockOrder.usedCoupon = mockCoupon;
+        mockOrder.totalPrice = 25;
+        mockOrder.orderDate = new Date();
+        mockOrder.address = mockAddress;
+
+        (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+        (orderRepository.findById as jest.Mock).mockResolvedValue(null);
+
+        const err = await orderService.getOrderHistoryDetails(1, '1').catch(e => e);
+        expect(err).toBeInstanceOf(OrderNotFoundException);
+        expect(err.message).toContain('The order with ID 1 not found');
+    });
+
+    it('Fail_OrderBadRequestException_ByWrongUser', async () => {
+        const mockUser = new User();
+        mockUser.id = 1;
+        mockUser.name = 'Mock User';
+
+        const mockUser2 = new User();
+        mockUser2.id = 2;
+        mockUser2.name = 'Mock User 2';
+
+        const mockAddress = new CustomerAddress();
+        mockAddress.addressInfo = 'Potato';
+
+        const mockBook = new Book();
+        mockBook.id = 1;
+        mockBook.price = 100;
+
+        const mockDiscount = new Discount();
+        mockDiscount.discountPercentage = 50;
+
+        const mockCoupon = new Coupon();
+        mockCoupon.discountPercentage = 50;
+
+        const mockOrder = new Order();
+        mockOrder.id = 1;
+        mockOrder.user = mockUser2;
+        mockOrder.usedCoupon = mockCoupon;
+        mockOrder.totalPrice = 25;
+        mockOrder.orderDate = new Date();
+        mockOrder.address = mockAddress;
+
+        (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+        (orderRepository.findById as jest.Mock).mockResolvedValue(mockOrder);
+
+        const err = await orderService.getOrderHistoryDetails(1, '1').catch(e => e);
+        expect(err).toBeInstanceOf(OrderBadRequestException);
+        expect(err.message).toContain('The user does not own this order');
     });
 
   });

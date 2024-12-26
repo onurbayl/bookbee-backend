@@ -9,4 +9,8 @@ export class OrderBadRequestException extends HttpException {
     throw new OrderBadRequestException('To request a purchase, the user cart should contain at least 1 item.', HttpStatus.BAD_REQUEST);
   }
 
+  static ByWrongUser(){
+    throw new OrderBadRequestException('The user does not own this order.', HttpStatus.BAD_REQUEST);
+  }
+
 }
