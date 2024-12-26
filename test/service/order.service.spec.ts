@@ -23,6 +23,7 @@ import { CustomerAddressNotFoundException } from 'src/app/customer-address/excep
 import { CouponInvalidDataException } from 'src/app/coupon/exceptions/coupon-invalid-data.exception';
 import { OrderBadRequestException } from 'src/app/order/exceptions/order-bad-request.exception';
 import { UserBadRequestException } from 'src/app/user/exceptions/user-bad-request.exception';
+import { Order } from 'src/app/order/order.entity';
 
 
 describe('WishListService', () => {
@@ -42,6 +43,7 @@ describe('WishListService', () => {
   beforeEach(async () => {
 
     orderRepository = {
+        findByUser: jest.fn(),
     };
 
     userRepository = {
@@ -466,6 +468,41 @@ describe('WishListService', () => {
         const err = await orderService.completePurchaseForUser(mockInput, "1").catch(e => e);
         expect(err).toBeInstanceOf(UserBadRequestException);
         expect(err.message).toContain('The user with Id 1 does not have enough balance to complete this transaction');
+    });
+
+  });
+  
+  describe('completePurchaseForUser', () => {
+    it('Success', async () => {
+        const mockUser = new User();
+        mockUser.id = 1;
+        mockUser.name = 'Mock User';
+
+        const mockOrder1 = new Order();
+        mockOrder1.id = 1;
+
+        const mockOrder2 = new Order();
+        mockOrder2.id = 2;
+
+        const orderList = [mockOrder1, mockOrder2];
+
+        (userRepository.findByUId as jest.Mock).mockReturnValue(mockUser);
+        (orderRepository.findByUser as jest.Mock).mockReturnValue(orderList);
+
+        const result = await orderService.getOrderHistory('1');
+
+        expect(result).toEqual(orderList);
+        expect(userRepository.findByUId).toHaveBeenCalledWith('1');
+        expect(orderRepository.findByUser).toHaveBeenCalledWith(1);
+    });
+
+    it('Fail_UserNotFoundException_byUId', async () => {
+
+        (userRepository.findByUId as jest.Mock).mockReturnValue(null);
+
+        const err = await orderService.getOrderHistory('1').catch(e => e);
+        expect(err).toBeInstanceOf(UserNotFoundException);
+        expect(err.message).toContain('User with given UID not found');
     });
 
   });

@@ -8,6 +8,13 @@ export class OrderRepository extends Repository<Order> {
         super(Order, dataSource.createEntityManager());
     }
 
-    //Add custom repositories
+    async findByUser(userId: number): Promise<Order[]>{
+        return this.createQueryBuilder('order')
+        .leftJoinAndSelect('order.user', 'user')
+        .leftJoinAndSelect('order.usedCoupon', 'coupon')
+        .leftJoinAndSelect('order.address', 'address')
+        .where('user.id = :user_id', {user_id: userId})
+        .getMany();
+    }
 
 }
