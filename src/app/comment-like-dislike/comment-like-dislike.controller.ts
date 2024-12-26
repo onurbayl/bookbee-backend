@@ -14,4 +14,12 @@ export class CommentLikeDislikeController {
         return result;
     }
 
+    @Post('add-like/:commentId')
+    @UseGuards(AuthGuard)
+    async AddLike(@Param('commentId') commentId: number, @Request() req){
+        const uId = req.user.uid;
+        const result = this.commentLikeDislikeService.addLike(uId, commentId);
+        return result;
+    }
+
 }

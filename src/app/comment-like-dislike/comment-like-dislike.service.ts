@@ -54,7 +54,42 @@ export class CommentLikeDislikeService {
             await this.commentLikeDislikeRepository.save(existingRecord);
             return { message: 'A record has been created as there was none.' };
         }
+    }
 
+    async addLike(userUId: string, commentId: number){
+
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+        
+        const comment = await this.commentRepository.findById(commentId);
+        if(comment == null){
+            CommentNotFoundException.byId(commentId);
+        }
+
+        let existingRecord = await this.commentLikeDislikeRepository.findByReviewAndUser(commentId, user.id);
+
+        if(existingRecord && existingRecord.likeDislike == 1){
+            await this.commentLikeDislikeRepository.delete(existingRecord);
+            return { message: 'A record has been deleted as it had been 1.' }
+        }
+        
+        if(existingRecord && existingRecord.likeDislike == -1){
+            existingRecord.likeDislike = 1;
+            await this.commentLikeDislikeRepository.save(existingRecord);
+            return { message: 'A record has been changed as it had been -1.' };
+        }
+
+        if(!existingRecord){
+            existingRecord = new CommentLikeDislike;
+            existingRecord.user = user;
+            existingRecord.comment = comment;
+            existingRecord.dateCreated = new Date();
+            existingRecord.likeDislike = 1;
+            await this.commentLikeDislikeRepository.save(existingRecord);
+            return { message: 'A new record has been created as there was none.' };
+        }
     }
 
 }
