@@ -9,13 +9,13 @@ import { RestrictedBookOpException } from "./exceptions/restricted-book-op.excep
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
-  @Get('get-book/:bookName')
+  @Get('get-bookName/:bookName')
   async findBookByName(@Param('bookName') bookName: string) {
     const book = await this.bookService.findBookByName(bookName);
     return book;
   }
 
-  @Get('get-book/:bookId')
+  @Get('get-bookId/:bookId')
   async findBookById(@Param('bookId') bookId: number) {
     const book = await this.bookService.findBookById(bookId);
     return book;
