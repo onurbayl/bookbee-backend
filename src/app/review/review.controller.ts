@@ -60,4 +60,12 @@ export class ReviewController {
         return result;
     }
 
+    @Get('get-reviews-like-count-user')
+    @UseGuards(AuthGuard)
+    async getReviewsByLikeCountAndUser(@Request() req){
+        const uId = req.user.uid;
+        const result = this.reviewService.getReviewsByLikeCountAndUser(uId);
+        return result;
+    }
+
 }

@@ -247,4 +247,42 @@ export class ReviewService {
         return reviewDto;
     }
 
+    async getReviewsByLikeCountAndUser(uId: string){
+
+        const user = await this.userRepository.findByUId(uId);
+        if(user == null){
+            UserNotFoundException.byUId();
+        }
+
+        let reviews = await this.reviewRepository.findByLikeCountAndUser(user.id);
+
+        if (!reviews) {
+            ReviewNotFoundException.byUser(user.id);
+        }
+  
+        let reviewsDto: ReviewWithLikeDislikeDto[] = [];
+
+        for (const review of reviews){
+
+            let reviewDto = new ReviewWithLikeDislikeDto();
+            reviewDto.id = review.id;
+            reviewDto.user = review.user;
+            reviewDto.book = review.book;
+            reviewDto.score = review.score;
+            reviewDto.content = review.content;
+            reviewDto.likeCount = await this.reviewLikeDislikeRepository.getLikeCount(review.id);
+            reviewDto.dislikeCount = await this.reviewLikeDislikeRepository.getDislikeCount(review.id);
+            reviewDto.userChoice = 0;
+            const userLike = await this.reviewLikeDislikeRepository.findByReviewAndUser(review.id, user.id);
+            if( userLike != null ){
+                reviewDto.userChoice = userLike.likeDislike;
+            }
+            reviewDto.dateCreated = review.dateCreated;
+
+            reviewsDto.push(reviewDto);
+        }
+  
+        return reviewsDto;
+    }
+
 }
