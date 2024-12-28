@@ -25,6 +25,7 @@ describe('BookService', () => {
       findByName: jest.fn(),
       findById: jest.fn(),
       findAll: jest.fn(),
+      findByPublisher: jest.fn(),
       save: jest.fn()
     };
 
@@ -159,6 +160,33 @@ describe('BookService', () => {
       expect(result).toEqual(mockBookList);
       expect(bookRepository.findAll).toHaveBeenCalledWith();
     
+    });
+  });
+
+  describe('findPublisherBooks', () => {
+    it('Success', async () => {
+      const mockBookList: Book[] = [];
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      mockBookList.push(mockBook);
+      mockBookList.push(mockBook2);
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findByPublisher as jest.Mock).mockResolvedValue(mockBookList);
+
+      const result = await bookService.findPublisherBooks("1");
+      const expectedResult = mockBookList;
+
+      expect(result).toEqual(expectedResult);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findByPublisher).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.findPublisherBooks("1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
     });
   });
 

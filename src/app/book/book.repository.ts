@@ -36,4 +36,11 @@ export class BookRepository extends Repository<Book> {
         .leftJoinAndSelect('book.genres', 'genres').getMany();
     }
 
+    async findByPublisher(userId: number): Promise<Book[]> {
+        return this.createQueryBuilder('book')
+        .leftJoinAndSelect('book.publisher', 'publisher')
+        .leftJoinAndSelect('book.genres', 'genres')
+        .where('publisher.id = :i_publisher', {i_publisher: userId})
+        .getMany();
+    }
 }

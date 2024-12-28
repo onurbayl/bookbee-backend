@@ -13,4 +13,7 @@ export class RestrictedBookOpException extends HttpException {
     throw new RestrictedBookOpException(`You are not authorized to delete a book.`, HttpStatus.FORBIDDEN)
   }
 
+  static Get() {
+    throw new RestrictedBookOpException(`You are not authorized to get published books.`, HttpStatus.FORBIDDEN)
+  }
 }

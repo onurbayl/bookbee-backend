@@ -27,6 +27,17 @@ export class BookController {
     return book;
   }
 
+  @Get('get-publisher-books')
+  @UseGuards(AuthGuard)
+  async findPublisherBooks( @Request() req ) {
+    const uId = req.user.uid;
+    if ( req.user.role != 'publisher' && req.user.role != 'admin') {
+      RestrictedBookOpException.Get();
+    }
+    const books = await this.bookService.findPublisherBooks(uId);
+    return books;
+  }
+
   @Post('upload-book')
   @UseGuards(AuthGuard)
   async uploadBook( @Body() createBookDto: createNewBookDto, @Request() req ){
