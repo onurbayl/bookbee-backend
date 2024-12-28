@@ -50,6 +50,14 @@ export class BookService {
     return await this.bookRepository.findAll();
   }
 
+  async findPublisherBooks(uId: string) {
+    const user = await this.userRepository.findByUId(uId);
+    if(user == null){
+        UserNotFoundException.byUId();
+    }
+    return await this.bookRepository.findByPublisher(user.id);
+  }
+
   async uploadBook(createBookDto: createNewBookDto, uId: string): Promise<Book> {
 
     const user = await this.userRepository.findByUId(uId);
