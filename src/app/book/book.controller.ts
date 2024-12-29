@@ -1,6 +1,5 @@
 import { Controller, Get, UseGuards, Post, Request, Patch, Delete, ForbiddenException, Param, NotFoundException, ValidationPipe, UsePipes, BadRequestException, InternalServerErrorException, Next, Query, Body } from '@nestjs/common';
 import { BookService } from './book.service';
-import { Book } from './book.entity';
 import { AuthGuard } from "src/guards/auth.guard";
 import { createNewBookDto } from "./dtos/create-new-book-dto";
 import { RestrictedBookOpException } from "./exceptions/restricted-book-op.exception"

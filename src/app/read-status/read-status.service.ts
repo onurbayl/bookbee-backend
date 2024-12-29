@@ -35,24 +35,19 @@ export class ReadStatusService {
         bookId: number,
         uId: string,
         status_number: number,
-    ): Promise<ReadStatus> {
-
-        if (status_number !== 0 && status_number !== 1 && status_number !== 2){
-            InvalidStatusException.Invalid();
-        }
+    ){
 
         let status: string;
 
-        if (status_number === 0){
+        if (status_number == 0){
             status = "Already Read";
         }
-        else if (status_number === 1){
+        else if (status_number == 1){
             status = "Reading"
         }
-        else if (status_number === 2){
+        else if (status_number == 2){
             status = "Will Read"
         }
-
         else {
             InvalidStatusException.Invalid();
         }
@@ -63,11 +58,14 @@ export class ReadStatusService {
         let readStatus = await this.readStatusRepository.getReadStatus(bookId, uId);
     
         if (readStatus) {
+            if( readStatus.status == status ){
+                await this.readStatusRepository.delete(readStatus);
+                return { message: 'The read status has been deleted.' }
+            }
             // Update the existing ReadStatus
             readStatus.status = status;
             readStatus.readDate = new Date();
-        } 
-        
+        }    
         else {
             // Create a new ReadStatus
             const user = await this.userRepository.findOneBy({ uid: uId });
