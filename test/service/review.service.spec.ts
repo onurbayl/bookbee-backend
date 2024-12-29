@@ -540,4 +540,66 @@ describe('ReviewService', () => {
         })
     });
 
+    describe('getReviewsByLikeCountAndUser', () => {
+        it('Success_getReviewsByLikeCountAndUser', async () =>{
+            const mockUser = new User();
+            mockUser.id = 1;
+            mockUser.name = 'Mock User';
+
+            const review1 = new ReviewWithLikeDislikeDto();
+            review1.id = 1;
+            review1.user = mockUser;
+            review1.content = undefined;
+            review1.dateCreated = undefined;
+            review1.dislikeCount = undefined;
+            review1.likeCount = undefined;
+            review1.score = undefined;
+            review1.user = undefined;
+            review1.userChoice = 0;
+
+            const review2 = new ReviewWithLikeDislikeDto();
+            review2.id = 2;
+            review2.user = mockUser;
+            review2.content = undefined;
+            review2.dateCreated = undefined;
+            review2.dislikeCount = undefined;
+            review2.likeCount = undefined;
+            review2.score = undefined;
+            review2.user = undefined;
+            review2.userChoice = 0;
+            
+            let mockReviewList: ReviewWithLikeDislikeDto[] = [review1, review2];
+
+            (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+            (reviewRepository.findByLikeCountAndUser as jest.Mock).mockResolvedValue(mockReviewList);
+
+            const result = await reviewService.getReviewsByLikeCountAndUser("1");
+
+            expect(result).toEqual(mockReviewList);
+            expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+
+        });
+        
+        it('Fail_UserNotFound', async () =>{ 
+            (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+  
+            const err = await reviewService.getReviewsByLikeCountAndUser("1").catch(e => e);
+            expect(err).toBeInstanceOf(UserNotFoundException);
+            expect(err.message).toContain('User with given UID not found');
+        })
+
+        it('Fail_ReviewNotFound', async () =>{
+            const mockUser = new User();
+            mockUser.id = 1;
+            mockUser.name = 'Mock User';
+
+            (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+            (reviewRepository.findByLikeCountAndUser as jest.Mock).mockResolvedValue(null);
+  
+            const err = await reviewService.getReviewsByLikeCountAndUser("1").catch(e => e);
+            expect(err).toBeInstanceOf(ReviewNotFoundException);
+            expect(err.message).toContain('Reviews by user 1 not found');
+        })
+    });
+
 })

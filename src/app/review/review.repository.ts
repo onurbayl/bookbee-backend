@@ -26,10 +26,10 @@ export class ReviewRepository extends Repository<Review> {
     }
 
     async GetTenLast(userId: number): Promise<Review[]> {
-        return this.createQueryBuilder('comment')
-        .leftJoin('comment.user', 'user')
+        return this.createQueryBuilder('review')
+        .leftJoin('review.user', 'user')
         .where('user.id = :i_user', {i_user: userId})
-        .orderBy('comment.dateCreated', 'DESC')
+        .orderBy('review.dateCreated', 'DESC')
         .take(10)
         .getMany();
     }
@@ -50,6 +50,19 @@ export class ReviewRepository extends Repository<Review> {
         .getMany();
     }
 
+    async findByLikeCountAndUser(userId: number): Promise<Review[]> {
+        return this.createQueryBuilder('review')
+        .leftJoinAndSelect('review.user', 'user')
+        .where('user.id = :i_user', {i_user: userId})
+        .leftJoin('review_like_dislike', 'review_like_dislike', 'review.id = review_like_dislike.review_id')
+        .addSelect('SUM (CASE WHEN review_like_dislike.likeDislike = 1 THEN 1 ELSE 0 END)', 'like_count')
+        .groupBy('review.id')
+        .addGroupBy('user.id')
+        .orderBy('like_count', 'DESC')
+        .addOrderBy('review.dateCreated', 'DESC')
+        .getMany();
+    }
+    
     async findAverageReviewScoreByBook(bookId: number): Promise<number | undefined> {
         const result = await this.createQueryBuilder('review')
         .leftJoin('review.book', 'book')
