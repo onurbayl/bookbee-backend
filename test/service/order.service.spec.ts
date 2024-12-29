@@ -28,7 +28,7 @@ import { OrderItem } from 'src/app/order-item/order-item.entity';
 import { OrderNotFoundException } from 'src/app/order/exceptions/order-not-found.exception';
 
 
-describe('WishListService', () => {
+describe('OrderService', () => {
   let orderService: OrderService;
   let dataSource: DataSource;
   let orderRepository: Partial<OrderRepository>;
