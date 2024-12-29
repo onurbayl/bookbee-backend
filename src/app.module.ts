@@ -23,6 +23,7 @@ import { AuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST,
@@ -34,7 +35,6 @@ import { AuthGuard } from './guards/auth.guard';
       synchronize: true,
       logging: true, // This enables SQL query logging
     }),
-    ConfigModule.forRoot(),
     UserModule,
     BookModule,
     CustomerAddressModule,
