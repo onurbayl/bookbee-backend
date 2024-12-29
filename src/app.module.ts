@@ -25,11 +25,11 @@ import { AuthGuard } from './guards/auth.guard';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '123456',
-      database: 'bookbee_backend_db',
+      host: process.env.DATABASE_HOST,
+      port: +process.env.DATABASE_PORT || 5432,
+      username: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
       logging: true, // This enables SQL query logging
