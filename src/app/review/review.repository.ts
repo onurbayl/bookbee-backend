@@ -62,5 +62,15 @@ export class ReviewRepository extends Repository<Review> {
         .addOrderBy('review.dateCreated', 'DESC')
         .getMany();
     }
+    
+    async findAverageReviewScoreByBook(bookId: number): Promise<number | undefined> {
+        const result = await this.createQueryBuilder('review')
+        .leftJoin('review.book', 'book')
+        .select('AVG(review.score)', 'averageScore')
+        .where('book.id = :i_book', { i_book: bookId })
+        .getRawOne();
+    
+        return result?.averageScore ? parseFloat(result.averageScore) : null;
+    }
 
 }

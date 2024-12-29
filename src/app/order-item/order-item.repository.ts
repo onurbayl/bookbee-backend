@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { OrderItem } from "./order-item.entity";
+import { Order } from "../order/order.entity";
+import { Book } from "../book/book.entity";
 
 @Injectable()
 export class OrderItemRepository extends Repository<OrderItem> {
@@ -17,4 +19,17 @@ export class OrderItemRepository extends Repository<OrderItem> {
         .getMany();
     }
 
+    async findSalesGroup(publisherId: number
+        ): Promise<{ date: string; quantity: string, revenue: string }[]> {
+        return await this.createQueryBuilder('orderItem')
+        .select('DATE("order"."orderDate")', 'date')
+        .addSelect('SUM("orderItem"."quantity")', 'quantity')
+        .addSelect('SUM("orderItem"."unitPrice")', 'revenue')
+        .where('book.publisher_id = :i_publisher', { i_publisher: publisherId })
+        .innerJoin(Order, 'order', '"orderItem"."order_id" = "order"."id"')
+        .innerJoin(Book, 'book', '"orderItem"."book_id" = "book"."id"')
+        .groupBy('DATE("order"."orderDate")')
+        .orderBy('date', 'ASC')
+        .getRawMany();
+    }    
 }

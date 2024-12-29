@@ -11,6 +11,9 @@ import { Genre } from "../genre/genre.entity";
 import { UpdateResult } from 'typeorm';
 import { InvalidBookInputException } from "./exceptions/invalid-book-input.exception"
 import { InvalidGenreException } from '../genre/exceptions/invalid-genre.exception';
+import { bookWithDetailDTO } from './dtos/book-with-detail-dto';
+import { DiscountRepository } from '../discount/discount.repository';
+import { ReviewRepository } from '../review/review.repository';
 
 @Injectable()
 export class BookService {
@@ -24,6 +27,12 @@ export class BookService {
 
     @InjectRepository(GenreRepository)
     private readonly genreRepository: GenreRepository,
+
+    @InjectRepository(DiscountRepository)
+    private readonly discountRepository: DiscountRepository,
+
+    @InjectRepository(ReviewRepository)
+    private readonly reviewRepository: ReviewRepository,
   ) {}
 
   async findBookByName(bookName: string): Promise<Book> {
@@ -46,8 +55,59 @@ export class BookService {
 
   }
 
-  async getAllBooks(): Promise<Book[] | undefined> {
-    return await this.bookRepository.findAll();
+  async getAllBooks(){
+
+    const books = await this.bookRepository.findAll();
+
+    let resultBooks = await Promise.all(books.map(async (item) => {
+      const averageReviewScore = await this.reviewRepository.findAverageReviewScoreByBook(item.id);
+
+      const discount = await this.discountRepository.findByBook(item.id);
+      let discountPercentage = 0;
+      let finalPrice = item.price;
+      if( discount != null ){
+        discountPercentage = discount.discountPercentage;
+        finalPrice = parseFloat( ( item.price*(100-discount.discountPercentage)/100 ).toFixed(2) );
+      }
+    
+      return new bookWithDetailDTO({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        publisher: item.publisher,
+        genres: item.genres,
+        writer: item.writer,
+        pageNumber: item.pageNumber,
+        datePublished: item.datePublished,
+        language: item.language,
+        bookDimension: item.bookDimension,
+        barcode: item.barcode,
+        isbn: item.isbn,
+        editionNumber: item.editionNumber,
+        imagePath: item.imagePath,
+        isDeleted: item.isDeleted,
+        averageReviewScore: averageReviewScore,
+        discountPercentage: discountPercentage,
+        finalPrice: finalPrice,
+      });
+    }));
+
+    resultBooks = resultBooks.sort((a, b) => {
+      if (a.averageReviewScore > b.averageReviewScore) return -1;
+      if (a.averageReviewScore < b.averageReviewScore) return 1;
+      return 0;
+    });
+
+    return resultBooks;
+  }
+
+  async findPublisherBooks(uId: string) {
+    const user = await this.userRepository.findByUId(uId);
+    if(user == null){
+      UserNotFoundException.byUId();
+    }
+    return await this.bookRepository.findByPublisher(user.id);
   }
 
   async uploadBook(createBookDto: createNewBookDto, uId: string): Promise<Book> {

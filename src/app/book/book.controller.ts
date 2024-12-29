@@ -1,6 +1,5 @@
 import { Controller, Get, UseGuards, Post, Request, Patch, Delete, ForbiddenException, Param, NotFoundException, ValidationPipe, UsePipes, BadRequestException, InternalServerErrorException, Next, Query, Body } from '@nestjs/common';
 import { BookService } from './book.service';
-import { Book } from './book.entity';
 import { AuthGuard } from "src/guards/auth.guard";
 import { createNewBookDto } from "./dtos/create-new-book-dto";
 import { RestrictedBookOpException } from "./exceptions/restricted-book-op.exception"
@@ -25,6 +24,17 @@ export class BookController {
   async fetchAllBooks() {
     const book = await this.bookService.getAllBooks();
     return book;
+  }
+
+  @Get('get-publisher-books')
+  @UseGuards(AuthGuard)
+  async findPublisherBooks( @Request() req ) {
+    const uId = req.user.uid;
+    if ( req.user.role != 'publisher' && req.user.role != 'admin') {
+      RestrictedBookOpException.Get();
+    }
+    const books = await this.bookService.findPublisherBooks(uId);
+    return books;
   }
 
   @Post('upload-book')

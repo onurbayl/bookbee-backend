@@ -9,7 +9,7 @@ import { BookModule } from "../book/book.module";
 import { ReviewLikeDislikeModule } from "../review-like-dislike/review-like-dislike.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Review]), UserModule, BookModule, forwardRef(() => ReviewLikeDislikeModule)],
+    imports: [TypeOrmModule.forFeature([Review]), UserModule, forwardRef(() => BookModule), forwardRef(() => ReviewLikeDislikeModule)],
     controllers: [ReviewController],
     providers: [ReviewService, ReviewRepository],
     exports: [ReviewRepository],

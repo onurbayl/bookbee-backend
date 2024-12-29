@@ -11,6 +11,8 @@ import { UserRepository } from 'src/app/user/user.repository';
 import { UserNotFoundException } from 'src/app/user/exceptions/user-not-found.exception';
 import { GenreRepository } from 'src/app/genre/genre.repository';
 import { Genre } from "src/app/genre/genre.entity";
+import { DiscountRepository } from 'src/app/discount/discount.repository';
+import { ReviewRepository } from 'src/app/review/review.repository';
 
 
 describe('BookService', () => {
@@ -18,6 +20,8 @@ describe('BookService', () => {
   let bookRepository: Partial<BookRepository>;
   let userRepository: Partial<UserRepository>;
   let genreRepository: Partial<GenreRepository>;
+  let discountRepository: Partial<DiscountRepository>;
+  let reviewRepository: Partial<ReviewRepository>;
 
   beforeEach(async () => {
 
@@ -25,6 +29,7 @@ describe('BookService', () => {
       findByName: jest.fn(),
       findById: jest.fn(),
       findAll: jest.fn(),
+      findByPublisher: jest.fn(),
       save: jest.fn()
     };
 
@@ -38,6 +43,14 @@ describe('BookService', () => {
       findGenre: jest.fn(),
     };
 
+    discountRepository = {
+      findByBook: jest.fn(),
+    };
+
+    reviewRepository = {
+      findAverageReviewScoreByBook: jest.fn(),
+    };
+
     // Create Testing Module
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -45,6 +58,8 @@ describe('BookService', () => {
         { provide: BookRepository, useValue: bookRepository },
         { provide: UserRepository, useValue: userRepository },
         { provide: GenreRepository, useValue: genreRepository },
+        { provide: DiscountRepository, useValue: discountRepository },
+        { provide: ReviewRepository, useValue: reviewRepository },
       ],
     }).compile();
 
@@ -152,13 +167,52 @@ describe('BookService', () => {
       mockBookList.push(mockBook);
       mockBookList.push(mockBook2);
 
+      let num: number = 4;
+
       (bookRepository.findAll as jest.Mock).mockResolvedValue(mockBookList);
+      (reviewRepository.findAverageReviewScoreByBook as jest.Mock).mockImplementation((item) => {
+        num++;
+        return num;
+      });
+      (discountRepository.findByBook as jest.Mock).mockResolvedValue(null);
 
       const result = await bookService.getAllBooks();
 
-      expect(result).toEqual(mockBookList);
+      expect(result[0].id).toEqual(2);
+      expect(result[1].id).toEqual(1);
+      expect(result[0].averageReviewScore).toEqual(6);
+      expect(result[1].averageReviewScore).toEqual(5);
       expect(bookRepository.findAll).toHaveBeenCalledWith();
+      expect(reviewRepository.findAverageReviewScoreByBook).toHaveBeenCalledTimes(2);
+      expect(discountRepository.findByBook).toHaveBeenCalledTimes(2);
     
+    });
+  });
+
+  describe('findPublisherBooks', () => {
+    it('Success', async () => {
+      const mockBookList: Book[] = [];
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      mockBookList.push(mockBook);
+      mockBookList.push(mockBook2);
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findByPublisher as jest.Mock).mockResolvedValue(mockBookList);
+
+      const result = await bookService.findPublisherBooks("1");
+      const expectedResult = mockBookList;
+
+      expect(result).toEqual(expectedResult);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findByPublisher).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.findPublisherBooks("1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
     });
   });
 
