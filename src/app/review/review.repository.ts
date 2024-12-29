@@ -28,6 +28,7 @@ export class ReviewRepository extends Repository<Review> {
     async GetTenLast(userId: number): Promise<Review[]> {
         return this.createQueryBuilder('review')
         .leftJoin('review.user', 'user')
+        .leftJoinAndSelect('review.book', 'book')
         .where('user.id = :i_user', {i_user: userId})
         .orderBy('review.dateCreated', 'DESC')
         .take(10)

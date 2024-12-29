@@ -19,11 +19,15 @@ import { OrderModule } from './app/order/order.module';
 import { OrderItemModule } from './app/order-item/order-item.module';
 import { ConfigModule } from '@nestjs/config'
 import { AuthGuard } from './guards/auth.guard';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EmailModule } from './mailer/email.module';
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST,
@@ -52,6 +56,7 @@ import { AuthGuard } from './guards/auth.guard';
     CartItemModule,
     OrderModule,
     OrderItemModule,
+    EmailModule,
   ],
   providers: [AuthGuard],
 })

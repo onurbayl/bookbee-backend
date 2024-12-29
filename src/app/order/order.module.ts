@@ -11,9 +11,10 @@ import { DiscountModule } from "../discount/discount.module";
 import { CouponModule } from "../coupon/coupon.module";
 import { OrderItemModule } from "../order-item/order-item.module";
 import { CustomerAddressModule } from "../customer-address/customer-address.module";
+import { EmailModule } from "src/mailer/email.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Order]), UserModule, ShoppingCartModule, CustomerAddressModule, CartItemModule, DiscountModule, CouponModule, OrderItemModule],
+    imports: [TypeOrmModule.forFeature([Order]), UserModule, ShoppingCartModule, CustomerAddressModule, CartItemModule, DiscountModule, CouponModule, OrderItemModule, EmailModule],
     controllers: [OrderController],
     providers: [OrderService, OrderRepository],
     exports: [OrderRepository],
