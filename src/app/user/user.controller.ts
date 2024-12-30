@@ -42,11 +42,17 @@ export class UserController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  async getUserById(@Param('id') id: number, @Request() req) {
+  async getUserById(@Param('id') Id: number, @Request() req) {
+    const user = await this.userService.getUserById(Id);
+
+    const { id, name, email, imagePath, description, favoriteGenres } = user;
+    
     if (req.user.role !== 'admin') {
-      UserUnauthorizedException.byNotAdmin()
+      return { id, name, email, imagePath, description, favoriteGenres }
     }
-    return await this.userService.getUserById(id);
+
+    return user
+    
   }
   
   @Put(':id')
