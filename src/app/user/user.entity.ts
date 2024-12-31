@@ -42,4 +42,7 @@ export class User {
 
     @Column({ default: false })
     isDeleted: boolean;
+
+    @Column({ type: 'integer', default: 0 })
+    role: number;
 }
