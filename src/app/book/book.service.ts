@@ -93,6 +93,8 @@ export class BookService {
       });
     }));
 
+    resultBooks = resultBooks.filter((book) => !book.isDeleted);
+
     resultBooks = resultBooks.sort((a, b) => {
       if (a.averageReviewScore > b.averageReviewScore) return -1;
       if (a.averageReviewScore < b.averageReviewScore) return 1;
