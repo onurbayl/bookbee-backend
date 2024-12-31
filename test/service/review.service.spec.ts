@@ -4,6 +4,7 @@ import { BookRepository } from 'src/app/book/book.repository';
 import { BookNotFoundException } from 'src/app/book/exceptions/book-not-found.exception';
 import { ReviewLikeDislikeRepository } from 'src/app/review-like-dislike/review-like-dislike.repository';
 import { ReviewWithLikeDislikeDto } from 'src/app/review/dtos/review-with-like-dislike-dto';
+import { ReviewBadRequestException } from 'src/app/review/exceptions/review-bad-request.exception';
 import { ReviewNotFoundException } from 'src/app/review/exceptions/review-not-found.exception';
 import { Review } from 'src/app/review/review.entity';
 import { ReviewRepository } from 'src/app/review/review.repository';
@@ -28,7 +29,8 @@ describe('ReviewService', () => {
             findById: jest.fn(),
             findByUser: jest.fn(),
             save: jest.fn(),
-            delete: jest.fn()
+            delete: jest.fn(),
+            findByLikeCountAndUser: jest.fn(),
         };
 
         bookRepository = {
@@ -388,7 +390,7 @@ describe('ReviewService', () => {
             (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
 
             const err = await reviewService.addReview(1, "1", null, null).catch(e => e);
-            expect(err).toBeInstanceOf(ReviewNotFoundException);
+            expect(err).toBeInstanceOf(ReviewBadRequestException);
             expect(err.message).toContain('Review does not contain a score or a content');
         })
 
@@ -404,7 +406,7 @@ describe('ReviewService', () => {
             (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
 
             const err = await reviewService.addReview(1, "1", 15, "This is amazing.").catch(e => e);
-            expect(err).toBeInstanceOf(ReviewNotFoundException);
+            expect(err).toBeInstanceOf(ReviewBadRequestException);
             expect(err.message).toContain('Given score is an invalid value');
         })
 
@@ -426,8 +428,8 @@ describe('ReviewService', () => {
             (reviewRepository.findByBookAndUser as jest.Mock).mockResolvedValue(mockReview);
 
             const err = await reviewService.addReview(1, "1", 8, "This is amazing.").catch(e => e);
-            expect(err).toBeInstanceOf(ReviewNotFoundException);
-            expect(err.message).toContain('Review for book 1 by user 1 already exists');
+            expect(err).toBeInstanceOf(ReviewBadRequestException);
+            expect(err.message).toContain('You already reviewed this book');
         })
     });
 

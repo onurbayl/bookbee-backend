@@ -68,8 +68,8 @@ export class ReadStatusService {
         }    
         else {
             // Create a new ReadStatus
-            const user = await this.userRepository.findOneBy({ uid: uId });
-            const book = await this.bookRepository.findOneBy({ id: bookId });
+            const user = await this.userRepository.findByUId(uId);
+            const book = await this.bookRepository.findById(bookId);
     
             if (!user) {
                 UserNotFoundException.byUId();
@@ -91,6 +91,35 @@ export class ReadStatusService {
     
         // Save the ReadStatus (insert or update)
         return this.readStatusRepository.save(readStatus);
+    }
+
+    async getReadStatusByBook(bookId: number, uId: string) {
+
+        const targetUser = await this.userRepository.findByUId(uId);
+        if( targetUser == null ){
+            return { status: null };
+        }
+
+        const book = await this.bookRepository.findById(bookId);
+        if ( book == null ) {
+            BookNotFoundException.byId(bookId);
+        }
+    
+        const status = await this.readStatusRepository.getReadStatus(bookId, targetUser.uid);
+
+        if ( status == null ){
+            return { status: null };
+        }
+        else if (status.status == "Already Read"){
+            return { status: 0 };
+        }
+        else if (status.status == "Reading"){
+            return { status: 1 };
+        }
+        else if (status.status == "Will Read"){
+            return { status: 2 };
+        }
+    
     }
 
 }
