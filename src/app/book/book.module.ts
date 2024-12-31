@@ -8,9 +8,10 @@ import { UserModule } from '../user/user.module';
 import { GenreModule } from '../genre/genre.module' 
 import { DiscountModule } from '../discount/discount.module';
 import { ReviewModule } from '../review/review.module';
+import { WishListModule } from '../wish-list/wish-list.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Book]), forwardRef(() => DiscountModule), forwardRef(() => ReviewModule), UserModule, GenreModule],
+  imports: [TypeOrmModule.forFeature([Book]), forwardRef(() => DiscountModule), forwardRef(() => ReviewModule), forwardRef(() => WishListModule), UserModule, GenreModule],
   controllers: [BookController],
   providers: [BookService, BookRepository],
   exports: [BookRepository],

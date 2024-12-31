@@ -19,6 +19,7 @@ export class bookWithDetailDTO{
     imagePath: string;
     isDeleted: boolean;
     averageReviewScore: number; //new
+    wishlistNumber: number; //new
     discountPercentage: number; //new
     finalPrice: number; //new
 
