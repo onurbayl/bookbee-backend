@@ -10,6 +10,7 @@ import { BookRepository } from "../book/book.repository";
 import { BookNotFoundException } from "../book/exceptions/book-not-found.exception";
 import { Review } from "./review.entity";
 import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
+import { ReviewBadRequestException } from "./exceptions/review-bad-request.exception";
 
 @Injectable()
 export class ReviewService {
@@ -108,17 +109,17 @@ export class ReviewService {
         }
       
         if(score == null || content == null){
-            ReviewNotFoundException.byScoreOrContent();
+            ReviewBadRequestException.byScoreOrContent();
         }
 
         if(score > 10 || score < 0){
-            ReviewNotFoundException.invalidScore();
+            ReviewBadRequestException.invalidScore();
         }
 
         let review = await this.reviewRepository.findByBookAndUser(bookId, user.id)
 
         if(review){
-            ReviewNotFoundException.reviewExists(bookId, user.id);   
+            ReviewBadRequestException.reviewExists(bookId, user.id);   
         }
 
         review = new Review();
