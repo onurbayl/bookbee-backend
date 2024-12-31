@@ -13,4 +13,8 @@ export class BookNotFoundException extends HttpException {
     throw new BookNotFoundException(`Book with name ${name} not found`, HttpStatus.NOT_FOUND)
   }
 
+  static deleted() {
+    throw new BookNotFoundException(`Book which you are trying to fetch is deleted`, HttpStatus.NOT_FOUND)
+  }
+
 }

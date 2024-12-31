@@ -3,6 +3,7 @@ import { BookService } from './book.service';
 import { AuthGuard } from "src/guards/auth.guard";
 import { createNewBookDto } from "./dtos/create-new-book-dto";
 import { RestrictedBookOpException } from "./exceptions/restricted-book-op.exception"
+import { BookNotFoundException } from './exceptions/book-not-found.exception';
 
 @Controller('api/v1/book')
 export class BookController {

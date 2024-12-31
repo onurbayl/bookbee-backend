@@ -41,6 +41,9 @@ export class BookService {
     if (rBook2 == null) { 
       BookNotFoundException.byName(bookName);
     }
+    if ( rBook2.isDeleted ) {
+      BookNotFoundException.deleted();
+    }
     return rBook2;
 
   }
@@ -50,6 +53,9 @@ export class BookService {
     const rBook2 = await this.bookRepository.findById(bookId);
     if (rBook2 == null) { 
       BookNotFoundException.byId(bookId);
+    }
+    if ( rBook2.isDeleted ) {
+      BookNotFoundException.deleted();
     }
     return rBook2;
 
@@ -93,6 +99,8 @@ export class BookService {
       });
     }));
 
+    resultBooks = resultBooks.filter((book) => !book.isDeleted);
+
     resultBooks = resultBooks.sort((a, b) => {
       if (a.averageReviewScore > b.averageReviewScore) return -1;
       if (a.averageReviewScore < b.averageReviewScore) return 1;
@@ -107,7 +115,9 @@ export class BookService {
     if(user == null){
       UserNotFoundException.byUId();
     }
-    return await this.bookRepository.findByPublisher(user.id);
+    let resultBooks = await this.bookRepository.findByPublisher(user.id);
+    resultBooks = resultBooks.filter((book) => !book.isDeleted);
+    return resultBooks;
   }
 
   async uploadBook(createBookDto: createNewBookDto, uId: string): Promise<Book> {
