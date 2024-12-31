@@ -12,18 +12,12 @@ export class BookController {
   @Get('get-bookName/:bookName')
   async findBookByName(@Param('bookName') bookName: string) {
     const book = await this.bookService.findBookByName(bookName);
-    if ( book.isDeleted ) {
-      BookNotFoundException.deleted();
-    }
     return book;
   }
 
   @Get('get-bookId/:bookId')
   async findBookById(@Param('bookId') bookId: number) {
     const book = await this.bookService.findBookById(bookId);
-    if ( book.isDeleted ) {
-      BookNotFoundException.deleted();
-    }
     return book;
   }
 
