@@ -27,6 +27,12 @@ export class BookController {
     return book;
   }
 
+  @Get('get-all-books-wishlist')
+  async fetchAllBooksWishlist() {
+    const book = await this.bookService.getAllBooksWishlist();
+    return book;
+  }
+
   @Get('get-publisher-books')
   @UseGuards(AuthGuard)
   async findPublisherBooks( @Request() req ) {

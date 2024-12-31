@@ -13,6 +13,7 @@ import { GenreRepository } from 'src/app/genre/genre.repository';
 import { Genre } from "src/app/genre/genre.entity";
 import { DiscountRepository } from 'src/app/discount/discount.repository';
 import { ReviewRepository } from 'src/app/review/review.repository';
+import { WishListRepository } from 'src/app/wish-list/wish-list.repository';
 
 
 describe('BookService', () => {
@@ -22,6 +23,7 @@ describe('BookService', () => {
   let genreRepository: Partial<GenreRepository>;
   let discountRepository: Partial<DiscountRepository>;
   let reviewRepository: Partial<ReviewRepository>;
+  let wishListRepository: Partial<WishListRepository>
 
   beforeEach(async () => {
 
@@ -51,6 +53,10 @@ describe('BookService', () => {
       findAverageReviewScoreByBook: jest.fn(),
     };
 
+    wishListRepository = {
+      countByBook: jest.fn(),
+    };
+
     // Create Testing Module
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -60,6 +66,7 @@ describe('BookService', () => {
         { provide: GenreRepository, useValue: genreRepository },
         { provide: DiscountRepository, useValue: discountRepository },
         { provide: ReviewRepository, useValue: reviewRepository },
+        { provide: WishListRepository, useValue: wishListRepository },
       ],
     }).compile();
 
@@ -184,6 +191,38 @@ describe('BookService', () => {
       expect(result[1].averageReviewScore).toEqual(5);
       expect(bookRepository.findAll).toHaveBeenCalledWith();
       expect(reviewRepository.findAverageReviewScoreByBook).toHaveBeenCalledTimes(2);
+      expect(discountRepository.findByBook).toHaveBeenCalledTimes(2);
+    
+    });
+  });
+
+  describe('getAllBooksWishlist', () => {
+    it('Success', async () => {
+
+      const mockBookList: Book[] = [];
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      mockBookList.push(mockBook);
+      mockBookList.push(mockBook2);
+
+      let num: number = 4;
+
+      (bookRepository.findAll as jest.Mock).mockResolvedValue(mockBookList);
+      (wishListRepository.countByBook as jest.Mock).mockImplementation((item) => {
+        num++;
+        return num;
+      });
+      (discountRepository.findByBook as jest.Mock).mockResolvedValue(null);
+
+      const result = await bookService.getAllBooksWishlist();
+
+      expect(result[0].id).toEqual(2);
+      expect(result[1].id).toEqual(1);
+      expect(result[0].wishlistNumber).toEqual(6);
+      expect(result[1].wishlistNumber).toEqual(5);
+      expect(bookRepository.findAll).toHaveBeenCalledWith();
+      expect(reviewRepository.findAverageReviewScoreByBook).toHaveBeenCalledTimes(2);
+      expect(wishListRepository.countByBook).toHaveBeenCalledTimes(2);
       expect(discountRepository.findByBook).toHaveBeenCalledTimes(2);
     
     });

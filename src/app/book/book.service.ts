@@ -14,6 +14,7 @@ import { InvalidGenreException } from '../genre/exceptions/invalid-genre.excepti
 import { bookWithDetailDTO } from './dtos/book-with-detail-dto';
 import { DiscountRepository } from '../discount/discount.repository';
 import { ReviewRepository } from '../review/review.repository';
+import { WishListRepository } from '../wish-list/wish-list.repository';
 
 @Injectable()
 export class BookService {
@@ -33,6 +34,9 @@ export class BookService {
 
     @InjectRepository(ReviewRepository)
     private readonly reviewRepository: ReviewRepository,
+
+    @InjectRepository(WishListRepository)
+    private readonly wishListRepository: WishListRepository,
   ) {}
 
   async findBookByName(bookName: string): Promise<Book> {
@@ -94,6 +98,7 @@ export class BookService {
         imagePath: item.imagePath,
         isDeleted: item.isDeleted,
         averageReviewScore: averageReviewScore,
+        wishlistNumber: null,
         discountPercentage: discountPercentage,
         finalPrice: finalPrice,
       });
@@ -104,6 +109,58 @@ export class BookService {
     resultBooks = resultBooks.sort((a, b) => {
       if (a.averageReviewScore > b.averageReviewScore) return -1;
       if (a.averageReviewScore < b.averageReviewScore) return 1;
+      return 0;
+    });
+
+    return resultBooks;
+  }
+
+  async getAllBooksWishlist(){
+
+    const books = await this.bookRepository.findAll();
+
+    let resultBooks = await Promise.all(books.map(async (item) => {
+      const averageReviewScore = await this.reviewRepository.findAverageReviewScoreByBook(item.id);
+
+      const discount = await this.discountRepository.findByBook(item.id);
+      let discountPercentage = 0;
+      let finalPrice = item.price;
+      if( discount != null ){
+        discountPercentage = discount.discountPercentage;
+        finalPrice = parseFloat( ( item.price*(100-discount.discountPercentage)/100 ).toFixed(2) );
+      }
+
+      const wishlistNumber = await this.wishListRepository.countByBook(item.id);
+    
+      return new bookWithDetailDTO({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        publisher: item.publisher,
+        genres: item.genres,
+        writer: item.writer,
+        pageNumber: item.pageNumber,
+        datePublished: item.datePublished,
+        language: item.language,
+        bookDimension: item.bookDimension,
+        barcode: item.barcode,
+        isbn: item.isbn,
+        editionNumber: item.editionNumber,
+        imagePath: item.imagePath,
+        isDeleted: item.isDeleted,
+        averageReviewScore: averageReviewScore,
+        wishlistNumber: wishlistNumber,
+        discountPercentage: discountPercentage,
+        finalPrice: finalPrice,
+      });
+    }));
+
+    resultBooks = resultBooks.filter((book) => !book.isDeleted);
+
+    resultBooks = resultBooks.sort((a, b) => {
+      if (a.wishlistNumber > b.wishlistNumber) return -1;
+      if (a.wishlistNumber < b.wishlistNumber) return 1;
       return 0;
     });
 

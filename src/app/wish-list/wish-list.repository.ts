@@ -24,4 +24,14 @@ export class WishListRepository extends Repository<WishList> {
         .where( 'user.id = :i_user', {i_user: userId} )
         .getMany();
     }
+
+    async countByBook(bookId: number): Promise<number> {
+        const result = await this.createQueryBuilder('wishList')
+        .leftJoin('wishList.book', 'book')
+        .select('COUNT(DISTINCT wishList.id)', 'distinctWishListCount')
+        .where('book.id = :i_book', { i_book: bookId })
+        .getRawOne();
+    
+        return result?.distinctWishListCount ? parseInt(result.distinctWishListCount, 10) : 0;
+    }
 }
