@@ -1,12 +1,12 @@
 services:
-  app:
+  backend:
     build:
-      context: .
+      context: ./bookbee-backend
       dockerfile: Dockerfile
     env_file:
       - .env
     ports:
-      - "80:3000"
+      - "3000:3000"
     depends_on:
       - postgres
 
@@ -21,3 +21,14 @@ services:
       - "5432:5432"
     volumes:
       - ./development_bookbee_dataset.sql:/docker-entrypoint-initdb.d/dataset.sql
+  
+  frontend:
+    build:
+        context: ./bookbee-frontend
+        dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "80:3000"
+    depends_on:
+      - backend
