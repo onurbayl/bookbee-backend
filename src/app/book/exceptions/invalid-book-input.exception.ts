@@ -13,4 +13,7 @@ export class InvalidBookInputException extends HttpException {
     throw new InvalidBookInputException(`Page number cannot be lower than 0`, HttpStatus.BAD_REQUEST)
   }
 
+  static IsDeleted() {
+    throw new InvalidBookInputException(`The book cannot be reuploaded as it was not deleted.`, HttpStatus.BAD_REQUEST)
+  }
 }

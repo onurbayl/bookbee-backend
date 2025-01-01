@@ -3,7 +3,7 @@ import { BookService } from './book.service';
 import { AuthGuard } from "src/guards/auth.guard";
 import { createNewBookDto } from "./dtos/create-new-book-dto";
 import { RestrictedBookOpException } from "./exceptions/restricted-book-op.exception"
-import { BookNotFoundException } from './exceptions/book-not-found.exception';
+
 
 @Controller('api/v1/book')
 export class BookController {
@@ -18,6 +18,17 @@ export class BookController {
   @Get('get-bookId/:bookId')
   async findBookById(@Param('bookId') bookId: number) {
     const book = await this.bookService.findBookById(bookId);
+    return book;
+  }
+
+  @Get('get-publisher-bookId/:bookId')
+  @UseGuards(AuthGuard)
+  async findPublisherBookById(@Param('bookId') bookId: number, @Request() req) {
+    const uId = req.user.uid;
+    if ( req.user.role != 'publisher' && req.user.role != 'admin') {
+      RestrictedBookOpException.Get();
+    }
+    const book = await this.bookService.findPublisherBookById(bookId, uId);
     return book;
   }
 
@@ -55,6 +66,17 @@ export class BookController {
     return result;
   }
 
+  @Patch('update-book/:bookId')
+  @UseGuards(AuthGuard)
+  async updateBook( @Param('bookId') bookId: number, @Body() createBookDto: createNewBookDto, @Request() req ){
+    const uId = req.user.uid;
+    if ( req.user.role != 'publisher' && req.user.role != 'admin') {
+      RestrictedBookOpException.Upload();
+    }
+    const result = await this.bookService.updateBook(bookId, createBookDto, uId);
+    return result;
+  }
+
   @Delete('delete-book/:bookId')
   @UseGuards(AuthGuard)
   async deleteBook(@Param('bookId') bookId: number, @Request() req ){
@@ -68,4 +90,25 @@ export class BookController {
 
   }
 
+  @Get('get-deleted-publisher-books')
+  @UseGuards(AuthGuard)
+  async findDeletedPublisherBooks( @Request() req ) {
+    const uId = req.user.uid;
+    if ( req.user.role != 'publisher' && req.user.role != 'admin') {
+      RestrictedBookOpException.Delete();
+    }
+    const books = await this.bookService.findDeletedPublisherBooks(uId);
+    return books;
+  }
+
+  @Post('reupload-book/:bookId')
+  @UseGuards(AuthGuard)
+  async reuploadBook( @Param('bookId') bookId: number, @Request() req ){
+    const uId = req.user.uid;
+    if ( req.user.role != 'publisher' && req.user.role != 'admin') {
+      RestrictedBookOpException.Upload();
+    }
+    const result = await this.bookService.reuploadBook(bookId, uId);
+    return result;
+  }
 }
