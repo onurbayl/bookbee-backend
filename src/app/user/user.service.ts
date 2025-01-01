@@ -113,6 +113,16 @@ export class UserService {
     return user;
   }
 
+  async getUserByUId(uid: string){
+    const user = await this.userRepository.findByUId(uid);
+
+    if (!user) {
+      UserNotFoundException.byUId()
+    }
+
+    return user;
+  }
+
   async getUserByToken(uid: string): Promise<User> {
     const user = await this.userRepository.findByUId(uid);
 
@@ -129,7 +139,7 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto) {
-    const { name, email, description, uid, favoriteGenres } = createUserDto;
+    const { name, email, description, uid, imagePath, favoriteGenres } = createUserDto;
 
     const firebaseUser = await firebaseAdmin.auth().getUser(uid);
     if(!firebaseUser){
@@ -155,9 +165,10 @@ export class UserService {
     newUser.email = email;
     newUser.description = description;
     newUser.uid = uid;
-    newUser.imagePath = '';
+    newUser.imagePath = imagePath;
     newUser.balance = 0;
     newUser.isDeleted = false;
+    newUser.role = "user";
 
     // Associate favorite genres
     if (favoriteGenres && favoriteGenres.length > 0) {
@@ -343,6 +354,7 @@ export class UserService {
   // Function to assign a role to a user
   async setUserRole(uid: string, role: string) {
     try {
+      //await firebaseAdmin.auth().setCustomUserClaims(uid, {});
       await firebaseAdmin.auth().setCustomUserClaims(uid, { role });
       console.log(`Role "${role}" assigned to user with UID: ${uid}`);
     } catch (error) {

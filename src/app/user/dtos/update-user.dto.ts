@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional() // Optional field since not all updates may include the name
@@ -15,4 +15,12 @@ export class UpdateUserDto {
   @IsString()
   @Length(1, 255) // Assuming image path length limit to 255 characters
   imagePath?: string;
+
+  @IsOptional()
+  @IsString()
+  balance?: number;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
 }

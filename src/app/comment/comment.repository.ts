@@ -10,8 +10,8 @@ export class CommentRepository extends Repository<Comment> {
 
     async findById(commentId: number): Promise<Comment | undefined> {
         return this.createQueryBuilder('comment')
-        .leftJoin('comment.user', 'user')
-        .leftJoin('comment.review', 'review')
+        .leftJoinAndSelect('comment.user', 'user')
+        .leftJoinAndSelect('comment.review', 'review')
         .where('comment.id = :i_comment', {i_comment: commentId})
         .getOne();
     }
@@ -41,6 +41,12 @@ export class CommentRepository extends Repository<Comment> {
         .addSelect('review.id')
         .where('user.id = :i_user', {i_user: userId})
         .getMany();
+    }
+
+    async findAll(): Promise<Comment[]> {
+        return await this.find({
+            relations: ['user', 'review'],
+        });
     }
 
 }

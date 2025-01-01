@@ -21,11 +21,11 @@ export class CreateUserDto {
 
     favoriteGenres: number[];
   
-    /* @IsOptional()
+    @IsOptional()
     @IsString()
     imagePath?: string;
   
-    @IsOptional()
+    /*@IsOptional()
     @IsString()
     balance?: string;
   
