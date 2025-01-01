@@ -75,8 +75,9 @@ export class FriendRequestService {
 
         // Check if friendship already exists
         let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
+        let friendship2: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(target.id, user.id);
         
-        if ( friendship == null ) {
+        if ( friendship == null && friendship2 == null ) {
             // - No: create a new friendship then save
             friendship = new FriendRequest();
             friendship.sender = user;
@@ -102,14 +103,14 @@ export class FriendRequestService {
         }
          
         // Check if friendship exists
-        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
+        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(target.id, user.id);
         if ( friendship == null ) {
-            FriendRequestNotFoundException.bySenderAndReceiver(user.id, target.id);
+            FriendRequestNotFoundException.bySenderAndReceiver(target.id, user.id);
         }
 
         // Check if the friendship is already established
         if ( friendship.dateAnswered != null ) {
-            FriendRequestForbiddenException.bySenderAndReceiver(user.id, target.id);
+            FriendRequestForbiddenException.bySenderAndReceiver(target.id, user.id);
         }
         
         // Respond to the request
@@ -132,15 +133,16 @@ export class FriendRequestService {
         }
          
         // Check if friendship exists
-        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
-        if ( friendship == null ) {
-            FriendRequestNotFoundException.bySenderAndReceiver(user.id, target.id);
+        let friendship: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(target.id, user.id);
+        let friendship2: FriendRequest = await this.friendRequestRepository.findByUserAndTarget(user.id, target.id);
+        if ( friendship == null && friendship2 == null) {
+            FriendRequestNotFoundException.between(target.id, user.id);
+        } else if ( friendship != null && friendship2 == null) {
+            await this.friendRequestRepository.deleteById(friendship.id);
+        } else if ( friendship == null && friendship2 != null) {
+            await this.friendRequestRepository.deleteById(friendship2.id);
         }
-
-        // Remove friendship
-        await this.friendRequestRepository.deleteById(friendship.id);
         
-        // Return response date
         return { message: `The friendship between users with ids ${user.id} and ${target.id} no longer exists.` };
     }
 }
