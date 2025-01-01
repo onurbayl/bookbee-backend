@@ -6,6 +6,14 @@ import { AuthGuard } from "src/guards/auth.guard";
 export class FriendRequestController {
     constructor(private readonly friendRequestService: FriendRequestService) {}
 
+    @Get('get-friend-requests')
+    @UseGuards(AuthGuard)
+    async getFriendRequests( @Request() req ) {
+        const uId = req.user.uid;
+        const result = this.friendRequestService.getFriendRequests(uId);
+        return result;
+    }
+
     @Get('get-friends')
     @UseGuards(AuthGuard)
     async getFriends( @Request() req ) {

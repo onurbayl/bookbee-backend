@@ -9,6 +9,15 @@ export class FriendRequestRepository extends Repository<FriendRequest>{
         super(FriendRequest, dataSource.createEntityManager());
     }
 
+    async findIncomingRequests(userId: number): Promise<FriendRequest[]> {
+        return this.createQueryBuilder('friendRequest')
+            .leftJoinAndSelect('friendRequest.sender', 'sender')
+            .leftJoin('friendRequest.receiver', 'receiver')
+            .where('receiver.id = :i_user', { i_user: userId })
+            .andWhere('friendRequest.dateAnswered IS NULL')
+            .getMany();
+    }
+
     async findFriends(userId: number): Promise<FriendRequest[]> {
         return this.createQueryBuilder('friendRequest')
             .leftJoinAndSelect('friendRequest.sender', 'sender')
