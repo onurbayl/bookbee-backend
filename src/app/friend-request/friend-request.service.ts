@@ -19,6 +19,23 @@ export class FriendRequestService {
         private readonly userRepository: UserRepository
     ) {}
 
+    async getFriendRequests(userUId: string) {
+        const user = await this.userRepository.findByUId(userUId);
+        if(user == null) {
+            UserNotFoundException.byUId();
+        }
+
+        // Find pending received requests
+        const friends: FriendRequest[] = await this.friendRequestRepository.findIncomingRequests(user.id);
+        
+        // Collect User objects
+        let users: User[] = [];
+        for (let friend of friends) {
+            users.push(friend.sender);
+        }
+        return users;
+    }
+
     async getFriends(userUId: string) {
         const user = await this.userRepository.findByUId(userUId);
         if(user == null) {
