@@ -15,6 +15,7 @@ import { bookWithDetailDTO } from './dtos/book-with-detail-dto';
 import { DiscountRepository } from '../discount/discount.repository';
 import { ReviewRepository } from '../review/review.repository';
 import { WishListRepository } from '../wish-list/wish-list.repository';
+import { RestrictedBookOpException } from './exceptions/restricted-book-op.exception';
 
 @Injectable()
 export class BookService {
@@ -63,6 +64,21 @@ export class BookService {
     }
     return rBook2;
 
+  }
+
+  async findPublisherBookById(bookId: number, uId: string) {
+    const user = await this.userRepository.findByUId(uId);
+    if(user == null){
+      UserNotFoundException.byUId();
+    }
+    const book = await this.bookRepository.findById(bookId);
+    if (book == null) { 
+      BookNotFoundException.byId(bookId);
+    }
+    if (book.publisher.id != user.id) {
+      RestrictedBookOpException.Get()
+    }
+    return book;
   }
 
   async getAllBooks(){
@@ -172,8 +188,50 @@ export class BookService {
     if(user == null){
       UserNotFoundException.byUId();
     }
-    let resultBooks = await this.bookRepository.findByPublisher(user.id);
+    let books = await this.bookRepository.findByPublisher(user.id);
+    let resultBooks = await Promise.all(books.map(async (item) => {
+      const averageReviewScore = await this.reviewRepository.findAverageReviewScoreByBook(item.id);
+
+      const discount = await this.discountRepository.findByBook(item.id);
+      let discountPercentage = 0;
+      let finalPrice = item.price;
+      if( discount != null ){
+        discountPercentage = discount.discountPercentage;
+        finalPrice = parseFloat( ( item.price*(100-discount.discountPercentage)/100 ).toFixed(2) );
+      }
+    
+      return new bookWithDetailDTO({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        publisher: item.publisher,
+        genres: item.genres,
+        writer: item.writer,
+        pageNumber: item.pageNumber,
+        datePublished: item.datePublished,
+        language: item.language,
+        bookDimension: item.bookDimension,
+        barcode: item.barcode,
+        isbn: item.isbn,
+        editionNumber: item.editionNumber,
+        imagePath: item.imagePath,
+        isDeleted: item.isDeleted,
+        averageReviewScore: averageReviewScore,
+        wishlistNumber: null,
+        discountPercentage: discountPercentage,
+        finalPrice: finalPrice,
+      });
+    }));
+
     resultBooks = resultBooks.filter((book) => !book.isDeleted);
+
+    resultBooks = resultBooks.sort((a, b) => {
+      if (a.averageReviewScore > b.averageReviewScore) return -1;
+      if (a.averageReviewScore < b.averageReviewScore) return 1;
+      return 0;
+    });
+
     return resultBooks;
   }
 
@@ -222,6 +280,56 @@ export class BookService {
 
   }
 
+  async updateBook(bookId: number, createBookDto: createNewBookDto, uId: string) {
+    const user = await this.userRepository.findByUId(uId);
+    if(user == null){
+      UserNotFoundException.byUId();
+    }
+
+    const booky = await this.bookRepository.findById(bookId);
+    if (booky == null) {
+      BookNotFoundException.byId(bookId);
+    }
+
+    // Fetch all Genre entities based on genre IDs
+    const genreEntities: Genre[] = [];
+    for (const genreId of createBookDto.genres) {
+      const genre = await this.genreRepository.findGenre(genreId);
+      if (!genre) {
+        InvalidGenreException.Invalid(genreId);
+      }
+      genreEntities.push(genre);
+    }
+
+    const { name, description, price, writer, pageNumber, datePublished,
+        language, bookDimension, barcode, isbn, editionNumber, imagePath, genres
+    } = createBookDto;
+    
+    if ( price < 0 ){ InvalidBookInputException.Price(); }
+    if ( pageNumber < 0 ){ InvalidBookInputException.PageNumber(); }
+    
+    const book = new Book();
+    book.id = booky.id;
+    book.name = name;
+    book.description = description;
+    book.price = price;
+    book.publisher = user;
+    book.writer = writer;
+    book.pageNumber = pageNumber;
+    book.datePublished = datePublished;
+    book.language = language;
+    book.bookDimension = bookDimension;
+    book.barcode = barcode;
+    book.isbn = isbn;
+    book.editionNumber = editionNumber;
+    book.imagePath = imagePath;
+    book.isDeleted = booky.isDeleted;
+    book.genres = genreEntities;
+
+    return await this.bookRepository.save(book);
+
+  }
+
   async deleteBook(bookId: number, uId: string): Promise<UpdateResult> {
 
     const rBook2 = await this.bookRepository.findById(bookId);
@@ -232,5 +340,79 @@ export class BookService {
 
     return deleteResult;
 
+  }
+
+  async findDeletedPublisherBooks(uId: string) {
+    const user = await this.userRepository.findByUId(uId);
+    if(user == null){
+      UserNotFoundException.byUId();
+    }
+    let books = await this.bookRepository.findByPublisher(user.id);
+    let resultBooks = await Promise.all(books.map(async (item) => {
+      const averageReviewScore = await this.reviewRepository.findAverageReviewScoreByBook(item.id);
+
+      const discount = await this.discountRepository.findByBook(item.id);
+      let discountPercentage = 0;
+      let finalPrice = item.price;
+      if( discount != null ){
+        discountPercentage = discount.discountPercentage;
+        finalPrice = parseFloat( ( item.price*(100-discount.discountPercentage)/100 ).toFixed(2) );
+      }
+    
+      return new bookWithDetailDTO({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        publisher: item.publisher,
+        genres: item.genres,
+        writer: item.writer,
+        pageNumber: item.pageNumber,
+        datePublished: item.datePublished,
+        language: item.language,
+        bookDimension: item.bookDimension,
+        barcode: item.barcode,
+        isbn: item.isbn,
+        editionNumber: item.editionNumber,
+        imagePath: item.imagePath,
+        isDeleted: item.isDeleted,
+        averageReviewScore: averageReviewScore,
+        wishlistNumber: null,
+        discountPercentage: discountPercentage,
+        finalPrice: finalPrice,
+      });
+    }));
+
+    resultBooks = resultBooks.filter((book) => book.isDeleted);
+
+    resultBooks = resultBooks.sort((a, b) => {
+      if (a.averageReviewScore > b.averageReviewScore) return -1;
+      if (a.averageReviewScore < b.averageReviewScore) return 1;
+      return 0;
+    });
+
+    return resultBooks;
+  }
+
+  async reuploadBook(bookId: number, uId: string) {
+    const user = await this.userRepository.findByUId(uId);
+    if(user == null){
+      UserNotFoundException.byUId();
+    }
+
+    const book = await this.bookRepository.findById(bookId);
+    if (book == null) {
+      BookNotFoundException.byId(bookId);
+    }
+    if (book.isDeleted == false) {
+      InvalidBookInputException.IsDeleted();
+    }
+    if (book.publisher.id != user.id) {
+      RestrictedBookOpException.Get()
+    }
+
+    await this.bookRepository.update(book.id, { isDeleted: false });
+
+    return `The book with ID ${book.id} is reuploaded.`;
   }
 }

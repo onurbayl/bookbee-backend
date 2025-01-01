@@ -14,6 +14,7 @@ import { Genre } from "src/app/genre/genre.entity";
 import { DiscountRepository } from 'src/app/discount/discount.repository';
 import { ReviewRepository } from 'src/app/review/review.repository';
 import { WishListRepository } from 'src/app/wish-list/wish-list.repository';
+import { bookWithDetailDTO } from 'src/app/book/dtos/book-with-detail-dto';
 
 
 describe('BookService', () => {
@@ -32,7 +33,8 @@ describe('BookService', () => {
       findById: jest.fn(),
       findAll: jest.fn(),
       findByPublisher: jest.fn(),
-      save: jest.fn()
+      save: jest.fn(),
+      update: jest.fn()
     };
 
     userRepository = {
@@ -116,6 +118,29 @@ describe('BookService', () => {
     editionNumber: '1st Edition',
     imagePath: 'path/to/image.jpg',
     genres: [1], 
+  };
+
+  const mockBookWithDetailDto: bookWithDetailDTO = {
+    id: 1,
+    averageReviewScore: null,
+    discountPercentage: 0,
+    finalPrice: 19.99,
+    wishlistNumber: null,
+    publisher: mockUser,
+    name: 'Test Book',
+    description: 'This is a test book description.',
+    price: 19.99,
+    writer: 'John Doe',
+    pageNumber: 250,
+    datePublished: 2023,
+    language: 'English',
+    bookDimension: '15x23cm',
+    barcode: '1234567890123',
+    isbn: '978-123-456789-0',
+    editionNumber: '1st Edition',
+    imagePath: 'path/to/image.jpg',
+    genres: [mockGenre], 
+    isDeleted: false
   };
 
   describe('findBookByName', () => {
@@ -231,16 +256,17 @@ describe('BookService', () => {
   describe('findPublisherBooks', () => {
     it('Success', async () => {
       const mockBookList: Book[] = [];
-      const mockBook2 = { ...mockBook }; 
-      mockBook2.id = 2; 
       mockBookList.push(mockBook);
-      mockBookList.push(mockBook2);
 
       (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
       (bookRepository.findByPublisher as jest.Mock).mockResolvedValue(mockBookList);
+      (discountRepository.findByBook as jest.Mock).mockResolvedValue(null);
+      (reviewRepository.findAverageReviewScoreByBook as jest.Mock).mockResolvedValue(null);
 
       const result = await bookService.findPublisherBooks("1");
-      const expectedResult = mockBookList;
+      const mockDTOs: bookWithDetailDTO[] = [];
+      mockDTOs.push(mockBookWithDetailDto);
+      const expectedResult = mockDTOs;
 
       expect(result).toEqual(expectedResult);
       expect(userRepository.findByUId).toHaveBeenCalledWith("1");
@@ -273,6 +299,131 @@ describe('BookService', () => {
 
     // Other situations for uploadBook will be added!
 
+  });
+
+  describe('findPublisherBookById', () => {
+    it('Success', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook);
+      const result = await bookService.findPublisherBookById(mockBook.id, "1");
+      expect(result).toEqual(mockBook);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook.id);
+    });
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.findPublisherBookById(mockBook.id, "1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+    });
+    it('Fail_BookNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.findPublisherBookById(mockBook.id, "1")).rejects.toThrow(BookNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook.id);
+    });
+    it('Fail_NotOwnsBook', async () => {
+      const mockUser2 = new User();
+      mockUser2.id = 2;
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      mockBook2.publisher = mockUser2;
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook2);
+      await expect(bookService.findPublisherBookById(mockBook2.id, "1")).rejects.toThrow(RestrictedBookOpException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook2.id);
+    });
+  });
+
+  describe('findDeletedPublisherBooks', () => {
+    it('Success', async () => {
+      const mockBookList: Book[] = [];
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      mockBook2.isDeleted = true;
+      const mockBook3 = { ...mockBook }; 
+      mockBook3.id = 3; 
+      mockBookList.push(mockBook2);
+      mockBookList.push(mockBook3);
+
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findByPublisher as jest.Mock).mockResolvedValue(mockBookList);
+      (discountRepository.findByBook as jest.Mock).mockResolvedValue(null);
+      (reviewRepository.findAverageReviewScoreByBook as jest.Mock).mockResolvedValue(null);
+
+      const result = await bookService.findDeletedPublisherBooks("1");
+      const mockDTOs: bookWithDetailDTO[] = [];
+      const mockBookWithDetailDto2 = { ...mockBookWithDetailDto }; 
+      mockBookWithDetailDto2.id = 2;
+      mockBookWithDetailDto2.isDeleted = true;
+      mockDTOs.push(mockBookWithDetailDto2);
+      const expectedResult = mockDTOs;
+
+      expect(result).toEqual(expectedResult);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findByPublisher).toHaveBeenCalledWith(mockUser.id);
+    });
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.findDeletedPublisherBooks("1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+    });
+  });
+
+  
+  describe('reuploadBook', () => {
+    it('Success', async () => {
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2;
+      mockBook2.isDeleted = true; 
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook2);
+      const result = await bookService.reuploadBook(mockBook2.id, "1");
+      const expectedResult = "The book with ID 2 is reuploaded.";
+      expect(result).toEqual(expectedResult);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook2.id);
+    });
+    it('Fail_UserNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.reuploadBook(mockBook.id, "1")).rejects.toThrow(UserNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+    });
+    it('Fail_BookNotFound', async () => {
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(bookService.reuploadBook(mockBook.id, "1")).rejects.toThrow(BookNotFoundException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook.id);
+    });
+    it('Fail_NotOwnsBook', async () => {
+      const mockUser2 = new User();
+      mockUser2.id = 2;
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      mockBook2.publisher = mockUser2;
+      mockBook2.isDeleted = true;
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook2);
+      await expect(bookService.reuploadBook(mockBook2.id, "1")).rejects.toThrow(RestrictedBookOpException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook2.id);
+    });
+    it('Fail_NotDeleted', async () => {
+      const mockBook2 = { ...mockBook }; 
+      mockBook2.id = 2; 
+      (userRepository.findByUId as jest.Mock).mockResolvedValue(mockUser);
+      (bookRepository.findById as jest.Mock).mockResolvedValue(mockBook2);
+      await expect(bookService.reuploadBook(mockBook2.id, "1")).rejects.toThrow(InvalidBookInputException);
+      expect(userRepository.findByUId).toHaveBeenCalledWith("1");
+      expect(bookRepository.findById).toHaveBeenCalledWith(mockBook2.id);
+    });
   });
 
   // Testing for deleteBook will be added!
