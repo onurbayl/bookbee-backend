@@ -71,10 +71,10 @@ export class UserController {
   }
 
   @Post('set-role')
-  @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard)
   async setUserRole(@Body() body: { uid: string; role: string }, @Request() req) {
-
-    if (req.user.role !== 'admin') {
+    const isAdmin = req.user.role === 'admin';
+    if (!isAdmin) {
       UserUnauthorizedException.byNotAdmin()
     }
 
@@ -84,8 +84,16 @@ export class UserController {
       throw new BadRequestException('UID and role are required.');
     }
 
+    const allowedRoles = ["user", "publisher", "admin"];
+    if (!allowedRoles.includes(role)) {
+      console.error(`Invalid role: ${role}`);
+      throw new BadRequestException(`Invalid role`);
+    }
+
     try {
       await this.userService.setUserRole(uid, role);
+      const user = await this.userService.getUserByUId(uid)
+      await this.userService.updateUser(user.id, {role}, isAdmin, req.user.uid);
       return { message: `Role "${role}" has been assigned to user with UID: ${uid}` };
     } catch (error) {
       throw new BadRequestException(`Failed to set role: ${error.message}`);
@@ -95,7 +103,8 @@ export class UserController {
   @Post('revoke-role')
   @UseGuards(AuthGuard)
   async revokeUserRole(@Body() body: { uid: string }, @Request() req) {
-    if (req.user.role !== 'admin') {
+    const isAdmin = req.user.role === 'admin';
+    if (!isAdmin) {
       UserUnauthorizedException.byNotAdmin()
     }
 
@@ -107,6 +116,8 @@ export class UserController {
 
     try {
       await this.userService.revokeUserRole(uid);
+      const user = await this.userService.getUserByUId(uid)
+      await this.userService.updateUser(user.id, {role:"user"}, isAdmin, req.user.uid);
       return { message: `Role has been revoked for user with UID: ${uid}` };
     } catch (error) {
       throw new BadRequestException(`Failed to revoke role: ${error.message}`);

@@ -189,4 +189,9 @@ export class CommentService {
         return { message: 'This comment with ID ' + commentId + ' was removed.' }
     }
 
+    async getAllComments() {
+        // Fetch all comments from the database
+        return this.commentRepository.findAll();
+    }
+
 }

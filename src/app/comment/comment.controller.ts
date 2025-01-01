@@ -3,10 +3,20 @@ import { CommentService } from "./comment.service";
 import { AuthGuard } from "src/guards/auth.guard";
 import { CommentWithLikeDislikeDto } from "./dtos/comment-with-like-dislike-dto";
 import { FirebaseAuthInterceptor } from "src/interceptors/firebase-auth.interceptor";
+import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 
 @Controller('api/v1/comment')
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
+
+    @Get()
+    @UseGuards(AuthGuard)
+    async GetAllComments(@Request() req) {
+        if (req.user.role !== 'admin') {
+            UserUnauthorizedException.byNotAdmin()
+        }
+        return await this.commentService.getAllComments();
+    }
   
     @Get('get-last-ten-comments/:userId')
     @UseInterceptors(FirebaseAuthInterceptor)

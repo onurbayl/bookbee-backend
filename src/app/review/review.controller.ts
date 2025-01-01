@@ -3,10 +3,20 @@ import { ReviewService } from "./review.service";
 import { AuthGuard } from "src/guards/auth.guard";
 import { ReviewWithLikeDislikeDto } from "./dtos/review-with-like-dislike-dto";
 import { FirebaseAuthInterceptor } from "src/interceptors/firebase-auth.interceptor";
+import { UserUnauthorizedException } from "../user/exceptions/user-unauthorized.exception";
 
 @Controller('api/v1/review')
 export class ReviewController {
     constructor(private readonly reviewService: ReviewService) {}
+
+    @Get()
+    @UseGuards(AuthGuard)
+    async GetAllReviews(@Request() req) {
+        if (req.user.role !== 'admin') {
+            UserUnauthorizedException.byNotAdmin()
+        }
+        return await this.reviewService.getAllReviews();
+    }
   
     @Delete('delete-review/:bookId/:userId')
     @UseGuards(AuthGuard)

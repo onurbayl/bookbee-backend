@@ -74,4 +74,12 @@ export class ReviewRepository extends Repository<Review> {
         return result?.averageScore ? parseFloat(result.averageScore) : null;
     }
 
+    async findAll(): Promise<Review[]> {
+    
+        return await this.find({
+            relations: ['book', 'user'],
+        });
+            
+    }
+
 }

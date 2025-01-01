@@ -286,4 +286,9 @@ export class ReviewService {
         return reviewsDto;
     }
 
+    async getAllReviews() {
+        // Fetch all reviews from the database
+        return this.reviewRepository.findAll();
+    }
+
 }
