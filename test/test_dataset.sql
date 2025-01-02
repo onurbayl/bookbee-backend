@@ -843,7 +843,10 @@ ALTER TABLE ONLY public.wish_list ALTER COLUMN id SET DEFAULT nextval('public.wi
 
 
 
-
+ALTER TABLE public."user"
+ALTER COLUMN balance TYPE NUMERIC(15, 2) USING balance::NUMERIC,
+ALTER COLUMN balance SET DEFAULT 0.00,
+ALTER COLUMN balance SET NOT NULL;
 
 
 
