@@ -6,9 +6,10 @@ import * as path from 'path';
 import { ConfigService } from '@nestjs/config';  // To access config
 import { TestModule } from 'test/test.module';
 import * as firebaseAdmin from 'firebase-admin';
-import { createNewBookDto } from 'src/app/book/dtos/create-new-book-dto';
+import { createNewAddressDto } from 'src/app/customer-address/dtos/create-new-address-dto';
+import { CommentWithLikeDislikeDto } from 'src/app/comment/dtos/comment-with-like-dislike-dto';
 
-describe('BookController', () => {
+describe('CommentController', () => {
     let app;
     let module: TestingModule;
     let client: Client;  // PostgreSQL client instance
@@ -117,55 +118,117 @@ describe('BookController', () => {
         await app.close();
     });
 
-    describe('/api/v1/book/get-all-books', () => {
+    describe('/api/v1/comment/get-comments-by-review/:reviewId', () => {
 
         it('Success', async () => {
+
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books')
+            .get('/api/v1/comment/get-comments-by-review/1')
             .expect(200);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(null);
+            expect(response.body.length).toEqual(1);
+            expect(response.body[0].content).toEqual('Great book! Highly recommend it.');
         });
 
     });
 
-    describe('/api/v1/book/get-all-books-wishlist', () => {
+    describe('/api/v1/comment/get-last-ten-comments/:userId', () => {
 
         it('Success', async () => {
+
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books-wishlist')
+            .get('/api/v1/comment/get-last-ten-comments/1')
             .expect(200);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(2);
-            expect(response.body[1].wishlistNumber).toEqual(1);
+            expect(response.body.length).toEqual(9);
+            expect(response.body[0].content).toEqual('One of the best books I’ve read this year.');
         });
 
     });
 
-    describe('api/v1/book/get-bookId/:bookId', () => {
+    describe('/api/v1/comment/delete-comment/:commentId', () => {
 
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookId/1`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
-        });
-
-    });
-
-    describe('/api/v1/book/get-publisher-books', () => {
-    
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'alice.johnson@example.com',
+                'email': 'john.doe@example.com',
+                'password': '12345678'
+            };
+
+            const login = await request(app.getHttpServer())
+            .post('/api/v1/user/login')
+            .send(loginBody)
+            .expect(201);
+
+            const bearerToken = login.body.idToken;
+
+            const deleteComment = await request(app.getHttpServer())
+            .delete('/api/v1/comment/delete-comment/20')
+            .set('Authorization', `Bearer ${bearerToken}`)
+            .expect(200);
+
+            const response = await request(app.getHttpServer())
+            .get('/api/v1/comment/get-last-ten-comments/1')
+            .expect(200);
+
+            expect(response.body).toBeDefined();
+            expect(response.body.length).toEqual(8);
+            expect(response.body[0].content).toEqual('Totally worth the hype, amazing read!');
+        });
+
+    });
+
+    describe('/api/v1/comment/add-comment/:reviewId', () => {
+
+        it('Success', async () => {
+
+            const loginBody = {
+                'email': 'john.doe@example.com',
+                'password': '12345678'
+            };
+
+            const login = await request(app.getHttpServer())
+            .post('/api/v1/user/login')
+            .send(loginBody)
+            .expect(201);
+
+            const bearerToken = login.body.idToken;
+
+            const response1 = await request(app.getHttpServer())
+            .get('/api/v1/comment/get-comments-by-review/80')
+            .expect(200);
+
+            expect(response1.body).toBeDefined();
+            expect(response1.body.length).toEqual(0);
+
+            const newComment = new CommentWithLikeDislikeDto();
+            newComment.content = 'Potato';
+
+            const addComment = await request(app.getHttpServer())
+            .post('/api/v1/comment/add-comment/80')
+            .set('Authorization', `Bearer ${bearerToken}`)
+            .send(newComment)
+            .expect(201);
+
+            const response2 = await request(app.getHttpServer())
+            .get('/api/v1/comment/get-comments-by-review/80')
+            .expect(200);
+
+            expect(response2.body).toBeDefined();
+            expect(response2.body.length).toEqual(1);
+            expect(response2.body[0].content).toEqual('Potato');
+        });
+
+    });
+
+    describe('/api/v1/comment/get-comments-by-user', () => {
+
+        it('Success', async () => {
+
+            const loginBody = {
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -177,96 +240,14 @@ describe('BookController', () => {
             const bearerToken = login.body.idToken;
 
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-publisher-books')
+            .get('/api/v1/comment/get-comments-by-user')
             .set('Authorization', `Bearer ${bearerToken}`)
             .expect(200);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(16);
-        });
-    
-    });
-
-    describe('api/v1/book get-bookName/:bookName', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookName/${encodeURIComponent('The Great Adventure')}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
+            expect(response.body.length).toEqual(9);
         });
 
-    });
-
-    describe('/api/v1/book/delete-book/:bookId', () => {
-    
-        it('Success', async () => {
-
-            const loginBody = {
-                'email': 'dana.white@example.com',
-                'password': '12345678'
-            };
-
-            const login = await request(app.getHttpServer())
-            .post('/api/v1/user/login')
-            .send(loginBody)
-            .expect(201);
-
-            const bearerToken = login.body.idToken;
-
-            const response = await request(app.getHttpServer())
-            .delete('/api/v1/book/delete-book/1')
-            .set('Authorization', `Bearer ${bearerToken}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-        });
-    
-    });
-
-    describe('/api/v1/book/upload-book', () => {
-    
-        it('Success', async () => {
-
-            const loginBody = {
-                'email': 'bob.brown@example.com',
-                'password': '12345678'
-            };
-
-            const login = await request(app.getHttpServer())
-            .post('/api/v1/user/login')
-            .send(loginBody)
-            .expect(201);
-
-            const bearerToken = login.body.idToken;
-
-            const newBook = new createNewBookDto();
-            newBook.name = 'banana';
-            newBook.description = 'banana';
-            newBook.price = 12.5;
-            newBook.writer = 'banana';
-            newBook.pageNumber = 55;
-            newBook.datePublished = 2024;
-            newBook.language = 'banana';
-            newBook.bookDimension = '50x60x20';
-            newBook.barcode = 'banana';
-            newBook.isbn = 'banana';
-            newBook.editionNumber = 'banana';
-            newBook.imagePath = 'banana';
-            newBook.genres = [1, 2];
-
-            const response = await request(app.getHttpServer())
-            .post('/api/v1/book/upload-book')
-            .set('Authorization', `Bearer ${bearerToken}`)
-            .send(newBook)
-            .expect(201);
-
-            expect(response.body).toBeDefined();
-        });
-    
     });
 
 });

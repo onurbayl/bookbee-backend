@@ -6,9 +6,10 @@ import * as path from 'path';
 import { ConfigService } from '@nestjs/config';  // To access config
 import { TestModule } from 'test/test.module';
 import * as firebaseAdmin from 'firebase-admin';
-import { createNewBookDto } from 'src/app/book/dtos/create-new-book-dto';
+import { createNewAddressDto } from 'src/app/customer-address/dtos/create-new-address-dto';
+import { CommentWithLikeDislikeDto } from 'src/app/comment/dtos/comment-with-like-dislike-dto';
 
-describe('BookController', () => {
+describe('CommentController', () => {
     let app;
     let module: TestingModule;
     let client: Client;  // PostgreSQL client instance
@@ -117,55 +118,43 @@ describe('BookController', () => {
         await app.close();
     });
 
-    describe('/api/v1/book/get-all-books', () => {
+    describe('/api/v1/review/get-reviews-book/:bookId', () => {
 
         it('Success', async () => {
+
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books')
+            .get('/api/v1/review/get-reviews-book/1')
             .expect(200);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(null);
+            expect(response.body.length).toEqual(4);
         });
 
     });
 
-    describe('/api/v1/book/get-all-books-wishlist', () => {
+    describe('/api/v1/review/get-last-ten-reviews/:userId', () => {
 
         it('Success', async () => {
+
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books-wishlist')
+            .get('/api/v1/review/get-last-ten-reviews/1')
             .expect(200);
 
+            console.log(response.body);
+
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(2);
-            expect(response.body[1].wishlistNumber).toEqual(1);
+            expect(response.body.length).toEqual(10);
+            expect(response.body[0].content).toEqual('An unforgettable fantasy adventure, absolutely loved it!');
         });
 
     });
 
-    describe('api/v1/book/get-bookId/:bookId', () => {
+    describe('/api/v1/review/delete-review/:bookId/:userId', () => {
 
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookId/1`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
-        });
-
-    });
-
-    describe('/api/v1/book/get-publisher-books', () => {
-    
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'alice.johnson@example.com',
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -176,37 +165,22 @@ describe('BookController', () => {
 
             const bearerToken = login.body.idToken;
 
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-publisher-books')
+            const deleteComment = await request(app.getHttpServer())
+            .delete('/api/v1/review/delete-review/1/1')
             .set('Authorization', `Bearer ${bearerToken}`)
             .expect(200);
 
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(16);
-        });
-    
-    });
-
-    describe('api/v1/book get-bookName/:bookName', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookName/${encodeURIComponent('The Great Adventure')}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
+            expect(deleteComment.body).toBeDefined();
         });
 
     });
 
-    describe('/api/v1/book/delete-book/:bookId', () => {
-    
+    describe('/api/v1/review/add-review/:bookId', () => {
+
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'dana.white@example.com',
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -217,22 +191,50 @@ describe('BookController', () => {
 
             const bearerToken = login.body.idToken;
 
-            const response = await request(app.getHttpServer())
-            .delete('/api/v1/book/delete-book/1')
-            .set('Authorization', `Bearer ${bearerToken}`)
+            const response1 = await request(app.getHttpServer())
+            .get('/api/v1/review/get-reviews-book/2')
             .expect(200);
 
-            expect(response.body).toBeDefined();
+            expect(response1.body).toBeDefined();
+            const totalReview = response1.body.length;
+
+            const newReview = { content: 'Elma', score: 10 }
+
+            const addComment = await request(app.getHttpServer())
+            .post('/api/v1/review/add-review/2')
+            .set('Authorization', `Bearer ${bearerToken}`)
+            .send(newReview)
+            .expect(201);
+
+            const response2 = await request(app.getHttpServer())
+            .get('/api/v1/review/get-reviews-book/2')
+            .expect(200);
+
+            expect(response2.body).toBeDefined();
+            expect(response2.body.length).toEqual(totalReview+1);
         });
-    
+
     });
 
-    describe('/api/v1/book/upload-book', () => {
-    
+    describe('/api/v1/review/add-review/:bookId', () => {
+
+        it('Success', async () => {
+            const response1 = await request(app.getHttpServer())
+            .get('/api/v1/review/get-reviews-book/2')
+            .expect(200);
+
+            expect(response1.body).toBeDefined();
+            expect(response1.body.length).toEqual(4);
+        });
+
+    });
+
+    describe('/api/v1/review/get-reviews-user', () => {
+
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'bob.brown@example.com',
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -243,30 +245,14 @@ describe('BookController', () => {
 
             const bearerToken = login.body.idToken;
 
-            const newBook = new createNewBookDto();
-            newBook.name = 'banana';
-            newBook.description = 'banana';
-            newBook.price = 12.5;
-            newBook.writer = 'banana';
-            newBook.pageNumber = 55;
-            newBook.datePublished = 2024;
-            newBook.language = 'banana';
-            newBook.bookDimension = '50x60x20';
-            newBook.barcode = 'banana';
-            newBook.isbn = 'banana';
-            newBook.editionNumber = 'banana';
-            newBook.imagePath = 'banana';
-            newBook.genres = [1, 2];
-
-            const response = await request(app.getHttpServer())
-            .post('/api/v1/book/upload-book')
+            const deleteComment = await request(app.getHttpServer())
+            .get('/api/v1/review/get-reviews-user')
             .set('Authorization', `Bearer ${bearerToken}`)
-            .send(newBook)
-            .expect(201);
+            .expect(200);
 
-            expect(response.body).toBeDefined();
+            expect(deleteComment.body).toBeDefined();
         });
-    
+
     });
 
 });

@@ -6,9 +6,10 @@ import * as path from 'path';
 import { ConfigService } from '@nestjs/config';  // To access config
 import { TestModule } from 'test/test.module';
 import * as firebaseAdmin from 'firebase-admin';
-import { createNewBookDto } from 'src/app/book/dtos/create-new-book-dto';
+import { createNewCouponDto } from 'src/app/coupon/dtos/create-new-coupon-dto';
+import { createNewDiscountDto } from 'src/app/discount/dtos/create-new-discount-dto';
 
-describe('BookController', () => {
+describe('DiscountController', () => {
     let app;
     let module: TestingModule;
     let client: Client;  // PostgreSQL client instance
@@ -117,118 +118,23 @@ describe('BookController', () => {
         await app.close();
     });
 
-    describe('/api/v1/book/get-all-books', () => {
+    describe('/api/v1/discount/get-discount/:bookId', () => {
 
         it('Success', async () => {
+
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books')
+            .get('/api/v1/discount/get-discount/3')
             .expect(200);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(null);
+            expect(response.body.discountPercentage).toEqual(10);
+            expect(response.body.book.name).toEqual('Fantasy World Chronicles');
         });
 
     });
 
-    describe('/api/v1/book/get-all-books-wishlist', () => {
+    describe('/api/v1/discount/add-discount', () => {
 
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books-wishlist')
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(2);
-            expect(response.body[1].wishlistNumber).toEqual(1);
-        });
-
-    });
-
-    describe('api/v1/book/get-bookId/:bookId', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookId/1`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
-        });
-
-    });
-
-    describe('/api/v1/book/get-publisher-books', () => {
-    
-        it('Success', async () => {
-
-            const loginBody = {
-                'email': 'alice.johnson@example.com',
-                'password': '12345678'
-            };
-
-            const login = await request(app.getHttpServer())
-            .post('/api/v1/user/login')
-            .send(loginBody)
-            .expect(201);
-
-            const bearerToken = login.body.idToken;
-
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-publisher-books')
-            .set('Authorization', `Bearer ${bearerToken}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(16);
-        });
-    
-    });
-
-    describe('api/v1/book get-bookName/:bookName', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookName/${encodeURIComponent('The Great Adventure')}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
-        });
-
-    });
-
-    describe('/api/v1/book/delete-book/:bookId', () => {
-    
-        it('Success', async () => {
-
-            const loginBody = {
-                'email': 'dana.white@example.com',
-                'password': '12345678'
-            };
-
-            const login = await request(app.getHttpServer())
-            .post('/api/v1/user/login')
-            .send(loginBody)
-            .expect(201);
-
-            const bearerToken = login.body.idToken;
-
-            const response = await request(app.getHttpServer())
-            .delete('/api/v1/book/delete-book/1')
-            .set('Authorization', `Bearer ${bearerToken}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-        });
-    
-    });
-
-    describe('/api/v1/book/upload-book', () => {
-    
         it('Success', async () => {
 
             const loginBody = {
@@ -243,30 +149,25 @@ describe('BookController', () => {
 
             const bearerToken = login.body.idToken;
 
-            const newBook = new createNewBookDto();
-            newBook.name = 'banana';
-            newBook.description = 'banana';
-            newBook.price = 12.5;
-            newBook.writer = 'banana';
-            newBook.pageNumber = 55;
-            newBook.datePublished = 2024;
-            newBook.language = 'banana';
-            newBook.bookDimension = '50x60x20';
-            newBook.barcode = 'banana';
-            newBook.isbn = 'banana';
-            newBook.editionNumber = 'banana';
-            newBook.imagePath = 'banana';
-            newBook.genres = [1, 2];
+            const newDiscount = new createNewDiscountDto();
+            newDiscount.discountPercentage = 25;
+            newDiscount.bookId = 6;
+            newDiscount.startDate = new Date(2026, 12, 12);
+            newDiscount.endDate = new Date(2028, 12, 12);
 
             const response = await request(app.getHttpServer())
-            .post('/api/v1/book/upload-book')
+            .post('/api/v1/discount/add-discount')
             .set('Authorization', `Bearer ${bearerToken}`)
-            .send(newBook)
+            .send(newDiscount)
             .expect(201);
 
             expect(response.body).toBeDefined();
+            expect(response.body.book.name).toEqual('Historical Reflections');
+            expect(response.body.discountPercentage).toEqual(25);
+            expect(response.body.startDate).toEqual(newDiscount.startDate.toISOString());
+            expect(response.body.endDate).toEqual(newDiscount.endDate.toISOString());
         });
-    
+
     });
 
 });
