@@ -166,7 +166,7 @@ export class UserService {
     newUser.description = description;
     newUser.uid = uid;
     newUser.imagePath = imagePath;
-    newUser.balance = 0;
+    newUser.balance = 0.00;
     newUser.isDeleted = false;
     newUser.role = "user";
 
@@ -245,6 +245,41 @@ export class UserService {
       console.log('error', error)
     }
   }
+
+  async transferBalance(senderUId: string, receiverId: number, amount: number): Promise<any> {
+    if(isNaN(amount) || amount <= 0){
+      UserBadRequestException.byInvalidAmount(amount)
+    }
+
+    const sender = await this.userRepository.findByUId(senderUId);
+    if(!sender){
+      UserNotFoundException.byUId()
+    }
+
+    const receiver = await this.userRepository.findById(receiverId);
+    if(!receiver){
+      UserNotFoundException.byId(receiverId)
+    }
+  
+    if (sender.balance < amount) {
+      UserBadRequestException.byNotEnoughBalance(sender.id)
+    }
+
+    if(sender.id === receiver.id){
+      UserBadRequestException.selfTransfer()
+    }
+  
+    // Perform the transfer
+    sender.balance -= amount;
+    receiver.balance += amount;
+  
+    // Save the updated users
+    await this.userRepository.save(sender);
+    await this.userRepository.save(receiver);
+  
+    return { message: 'Transfer successful', senderBalance: sender, receiverBalance: receiver };
+  }
+  
 
   /* // This is the most important part, necessary
   async validateRequest(req): Promise<boolean> {

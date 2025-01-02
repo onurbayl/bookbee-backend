@@ -25,4 +25,12 @@ export class UserBadRequestException extends HttpException {
     throw new UserBadRequestException(`The user with Id ${id} does not have enough balance to complete this transaction.`, HttpStatus.BAD_REQUEST)
   }
 
+  static byInvalidAmount(amount: number) {
+    throw new UserBadRequestException(`The amount ${amount} must be greater than 0.`, HttpStatus.BAD_REQUEST)
+  }
+
+  static selfTransfer() {
+    throw new UserBadRequestException(`You cannot transfer balance to yourself`, HttpStatus.BAD_REQUEST)
+  }
+
 }

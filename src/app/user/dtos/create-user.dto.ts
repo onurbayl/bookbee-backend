@@ -27,7 +27,7 @@ export class CreateUserDto {
   
     /*@IsOptional()
     @IsString()
-    balance?: string;
+    balance?: number;
   
     @IsOptional()
     isDeleted?: boolean; */
