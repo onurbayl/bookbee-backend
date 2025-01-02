@@ -1,32 +1,24 @@
 services:
   backend:
     build:
-      context: ./bookbee-backend
+      context: .
       dockerfile: Dockerfile
     env_file:
       - .env
+    container_name: nestjs-backend
     ports:
-      - "3000:3000"
+      - "80:3000"
     depends_on:
       - postgres
 
   postgres:
     image: postgres:17.2
     container_name: postgres_container
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mJ123!Xq7p0.fE9
+      POSTGRES_DB: bookbee_backend_db
     ports:
       - "5432:5432"
     volumes:
       - ./development_bookbee_dataset.sql:/docker-entrypoint-initdb.d/dataset.sql
-  
-  frontend:
-    build:
-        context: ./bookbee-frontend
-        dockerfile: Dockerfile
-    env_file:
-      - .env
-    ports:
-      - "80:3000"
-    depends_on:
-      - backend
