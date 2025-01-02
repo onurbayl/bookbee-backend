@@ -12,7 +12,7 @@ export class CouponController {
     @UseGuards(AuthGuard)
     async getCouponsForUser( @Request() req ){
         const uId = req.user.uid;
-        const result = this.couponService.getCouponsForUser(uId);
+        const result = await this.couponService.getCouponsForUser(uId);
         return result;
     }
 
@@ -22,7 +22,7 @@ export class CouponController {
         if (req.user.role !== 'admin') {
             UserUnauthorizedException.byNotAdmin()
         }
-        const result = this.couponService.addCouponToDatabase(inputData);
+        const result = await this.couponService.addCouponToDatabase(inputData);
         return result;
     }
 

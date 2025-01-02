@@ -6,9 +6,9 @@ import * as path from 'path';
 import { ConfigService } from '@nestjs/config';  // To access config
 import { TestModule } from 'test/test.module';
 import * as firebaseAdmin from 'firebase-admin';
-import { createNewBookDto } from 'src/app/book/dtos/create-new-book-dto';
+import { createNewAddressDto } from 'src/app/customer-address/dtos/create-new-address-dto';
 
-describe('BookController', () => {
+describe('CommentLikeDislikeController', () => {
     let app;
     let module: TestingModule;
     let client: Client;  // PostgreSQL client instance
@@ -117,55 +117,12 @@ describe('BookController', () => {
         await app.close();
     });
 
-    describe('/api/v1/book/get-all-books', () => {
+    describe('/api/v1/comment-like/add-like/:commentId', () => {
 
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books')
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(null);
-        });
-
-    });
-
-    describe('/api/v1/book/get-all-books-wishlist', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books-wishlist')
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(2);
-            expect(response.body[1].wishlistNumber).toEqual(1);
-        });
-
-    });
-
-    describe('api/v1/book/get-bookId/:bookId', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookId/1`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
-        });
-
-    });
-
-    describe('/api/v1/book/get-publisher-books', () => {
-    
-        it('Success', async () => {
+        it('Success_noLikeDislike', async () => {
 
             const loginBody = {
-                'email': 'alice.johnson@example.com',
+                'email': 'yildirimbananagiray@gmail.com',
                 'password': '12345678'
             };
 
@@ -177,36 +134,22 @@ describe('BookController', () => {
             const bearerToken = login.body.idToken;
 
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-publisher-books')
+            .post('/api/v1/comment-like/add-like/5')
             .set('Authorization', `Bearer ${bearerToken}`)
-            .expect(200);
+            .expect(201);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(16);
-        });
-    
-    });
-
-    describe('api/v1/book get-bookName/:bookName', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookName/${encodeURIComponent('The Great Adventure')}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
+            expect(response.body.message).toEqual('A new record has been created as there was none.');
         });
 
     });
 
-    describe('/api/v1/book/delete-book/:bookId', () => {
-    
-        it('Success', async () => {
+    describe('/api/v1/comment-like/add-dislike/:commentId', () => {
+
+        it('Success_noLikeDislike', async () => {
 
             const loginBody = {
-                'email': 'dana.white@example.com',
+                'email': 'yildirimbananagiray@gmail.com',
                 'password': '12345678'
             };
 
@@ -218,55 +161,14 @@ describe('BookController', () => {
             const bearerToken = login.body.idToken;
 
             const response = await request(app.getHttpServer())
-            .delete('/api/v1/book/delete-book/1')
+            .post('/api/v1/comment-like/add-dislike/5')
             .set('Authorization', `Bearer ${bearerToken}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-        });
-    
-    });
-
-    describe('/api/v1/book/upload-book', () => {
-    
-        it('Success', async () => {
-
-            const loginBody = {
-                'email': 'bob.brown@example.com',
-                'password': '12345678'
-            };
-
-            const login = await request(app.getHttpServer())
-            .post('/api/v1/user/login')
-            .send(loginBody)
-            .expect(201);
-
-            const bearerToken = login.body.idToken;
-
-            const newBook = new createNewBookDto();
-            newBook.name = 'banana';
-            newBook.description = 'banana';
-            newBook.price = 12.5;
-            newBook.writer = 'banana';
-            newBook.pageNumber = 55;
-            newBook.datePublished = 2024;
-            newBook.language = 'banana';
-            newBook.bookDimension = '50x60x20';
-            newBook.barcode = 'banana';
-            newBook.isbn = 'banana';
-            newBook.editionNumber = 'banana';
-            newBook.imagePath = 'banana';
-            newBook.genres = [1, 2];
-
-            const response = await request(app.getHttpServer())
-            .post('/api/v1/book/upload-book')
-            .set('Authorization', `Bearer ${bearerToken}`)
-            .send(newBook)
             .expect(201);
 
             expect(response.body).toBeDefined();
+            expect(response.body.message).toEqual('A record has been created as there was none.');
         });
-    
+
     });
 
 });

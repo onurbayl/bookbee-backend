@@ -22,7 +22,7 @@ export class DiscountController {
 
     @Get('get-discount/:bookId')
     async getActiveDiscountForBook( @Param('bookId') bookId: number ){
-        const result = this.discountService.getActiveDiscountForBook(bookId);
+        const result = await this.discountService.getActiveDiscountForBook(bookId);
         return result;
     }
 

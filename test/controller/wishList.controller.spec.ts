@@ -6,9 +6,8 @@ import * as path from 'path';
 import { ConfigService } from '@nestjs/config';  // To access config
 import { TestModule } from 'test/test.module';
 import * as firebaseAdmin from 'firebase-admin';
-import { createNewBookDto } from 'src/app/book/dtos/create-new-book-dto';
 
-describe('BookController', () => {
+describe('WishListController', () => {
     let app;
     let module: TestingModule;
     let client: Client;  // PostgreSQL client instance
@@ -117,55 +116,12 @@ describe('BookController', () => {
         await app.close();
     });
 
-    describe('/api/v1/book/get-all-books', () => {
+    describe('/api/v1/wishList/get-items', () => {
 
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books')
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(null);
-        });
-
-    });
-
-    describe('/api/v1/book/get-all-books-wishlist', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-all-books-wishlist')
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(30);
-            expect(response.body[0].wishlistNumber).toEqual(2);
-            expect(response.body[1].wishlistNumber).toEqual(1);
-        });
-
-    });
-
-    describe('api/v1/book/get-bookId/:bookId', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookId/1`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
-        });
-
-    });
-
-    describe('/api/v1/book/get-publisher-books', () => {
-    
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'alice.johnson@example.com',
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -177,36 +133,22 @@ describe('BookController', () => {
             const bearerToken = login.body.idToken;
 
             const response = await request(app.getHttpServer())
-            .get('/api/v1/book/get-publisher-books')
+            .get('/api/v1/wishList/get-items')
             .set('Authorization', `Bearer ${bearerToken}`)
             .expect(200);
 
             expect(response.body).toBeDefined();
-            expect(response.body.length).toEqual(16);
-        });
-    
-    });
-
-    describe('api/v1/book get-bookName/:bookName', () => {
-
-        it('Success', async () => {
-            const response = await request(app.getHttpServer())
-            .get(`/api/v1/book/get-bookName/${encodeURIComponent('The Great Adventure')}`)
-            .expect(200);
-
-            expect(response.body).toBeDefined();
-            expect(response.body.id).toEqual(1);
-            expect(response.body.name).toEqual('The Great Adventure');
+            expect(response.body.length).toEqual(3);
         });
 
     });
 
-    describe('/api/v1/book/delete-book/:bookId', () => {
-    
+    describe('/api/v1/wishList/remove-item/:bookId', () => {
+
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'dana.white@example.com',
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -217,22 +159,28 @@ describe('BookController', () => {
 
             const bearerToken = login.body.idToken;
 
+            const deleteItem = await request(app.getHttpServer())
+            .delete('/api/v1/wishList/remove-item/12')
+            .set('Authorization', `Bearer ${bearerToken}`)
+            .expect(200);
+
             const response = await request(app.getHttpServer())
-            .delete('/api/v1/book/delete-book/1')
+            .get('/api/v1/wishList/get-items')
             .set('Authorization', `Bearer ${bearerToken}`)
             .expect(200);
 
             expect(response.body).toBeDefined();
+            expect(response.body.length).toEqual(2);
         });
-    
+
     });
 
-    describe('/api/v1/book/upload-book', () => {
-    
+    describe('/api/v1/wishList/add-item/:bookId', () => {
+
         it('Success', async () => {
 
             const loginBody = {
-                'email': 'bob.brown@example.com',
+                'email': 'john.doe@example.com',
                 'password': '12345678'
             };
 
@@ -243,30 +191,20 @@ describe('BookController', () => {
 
             const bearerToken = login.body.idToken;
 
-            const newBook = new createNewBookDto();
-            newBook.name = 'banana';
-            newBook.description = 'banana';
-            newBook.price = 12.5;
-            newBook.writer = 'banana';
-            newBook.pageNumber = 55;
-            newBook.datePublished = 2024;
-            newBook.language = 'banana';
-            newBook.bookDimension = '50x60x20';
-            newBook.barcode = 'banana';
-            newBook.isbn = 'banana';
-            newBook.editionNumber = 'banana';
-            newBook.imagePath = 'banana';
-            newBook.genres = [1, 2];
-
-            const response = await request(app.getHttpServer())
-            .post('/api/v1/book/upload-book')
+            const addItem = await request(app.getHttpServer())
+            .post('/api/v1/wishList/add-item/1')
             .set('Authorization', `Bearer ${bearerToken}`)
-            .send(newBook)
             .expect(201);
 
+            const response = await request(app.getHttpServer())
+            .get('/api/v1/wishList/get-items')
+            .set('Authorization', `Bearer ${bearerToken}`)
+            .expect(200);
+
             expect(response.body).toBeDefined();
+            expect(response.body.length).toEqual(4);
         });
-    
+
     });
 
 });

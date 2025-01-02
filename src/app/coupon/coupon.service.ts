@@ -60,7 +60,7 @@ export class CouponService {
         newCoupon.endDate = endDate;
         newCoupon.used = false;
 
-        return this.couponRepository.save(newCoupon);
+        return await this.couponRepository.save(newCoupon);
     }
 
 }
