@@ -34,7 +34,17 @@ export class User {
     @Column({ type: 'varchar', length: 255 })
     imagePath: string;
 
-    @Column({ type: 'numeric', scale: 2  })
+    /* @Column({ type: 'numeric', scale: 2  })
+    balance: number; */
+    @Column({
+        type: 'numeric',
+        precision: 15,
+        scale: 2,
+        transformer: {
+            to: (value: number) => value, // Save as is
+            from: (value: string) => parseFloat(value), // Convert to number on retrieval
+        },
+    })
     balance: number;
 
     @Column({ type: 'varchar', length: 2048 })

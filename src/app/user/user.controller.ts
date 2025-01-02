@@ -54,6 +54,20 @@ export class UserController {
     return user
     
   }
+
+  @Put('transfer/:receiverId')
+  @UseGuards(AuthGuard)
+  async transferBalance(
+    @Param('receiverId') receiverId: number,
+    @Body('amount') amount: number,
+    @Request() req
+  ) {
+    
+    const senderUId = req.user.uid;
+
+    return this.userService.transferBalance(senderUId, receiverId, amount);
+  }
+
   
   @Put(':id')
   @UseGuards(AuthGuard)
